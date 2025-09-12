@@ -1,0 +1,667 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D9144B902E46278A00C97DB1 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = D9144B8F2E46278A00C97DB1 /* LaunchAtLogin */; };
+		D93EA8222E3FCF45000710F9 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = D93EA8212E3FCF45000710F9 /* OpenAI */; };
+		D93EA84C2E3FD743000710F9 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D93EA84B2E3FD743000710F9 /* KeychainSwift */; };
+		D98308012E3D172D00182E00 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = D98308002E3D172D00182E00 /* SQLite */; };
+		D983088A2E3E2B4C00182E00 /* HighlightSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D98308892E3E2B4C00182E00 /* HighlightSwift */; };
+		D9F58AE72E38928900786D5C /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = D9F58AE62E38928900786D5C /* HotKey */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D9F58AC92E388F6E00786D5C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D9F58AAF2E388F6C00786D5C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D9F58AB62E388F6C00786D5C;
+			remoteInfo = ClipAI;
+		};
+		D9F58AD32E388F6E00786D5C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D9F58AAF2E388F6C00786D5C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D9F58AB62E388F6C00786D5C;
+			remoteInfo = ClipAI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D9F58AB72E388F6C00786D5C /* ClipAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9F58AC82E388F6E00786D5C /* ClipAITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9F58AD22E388F6E00786D5C /* ClipAIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipAIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D9F58AB92E388F6C00786D5C /* ClipAI */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClipAI;
+			sourceTree = "<group>";
+		};
+		D9F58ACB2E388F6E00786D5C /* ClipAITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClipAITests;
+			sourceTree = "<group>";
+		};
+		D9F58AD52E388F6E00786D5C /* ClipAIUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClipAIUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D9F58AB42E388F6C00786D5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D9144B902E46278A00C97DB1 /* LaunchAtLogin in Frameworks */,
+				D983088A2E3E2B4C00182E00 /* HighlightSwift in Frameworks */,
+				D98308012E3D172D00182E00 /* SQLite in Frameworks */,
+				D93EA84C2E3FD743000710F9 /* KeychainSwift in Frameworks */,
+				D93EA8222E3FCF45000710F9 /* OpenAI in Frameworks */,
+				D9F58AE72E38928900786D5C /* HotKey in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58AC52E388F6E00786D5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58ACF2E388F6E00786D5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D9F58AAE2E388F6C00786D5C = {
+			isa = PBXGroup;
+			children = (
+				D9F58AB92E388F6C00786D5C /* ClipAI */,
+				D9F58ACB2E388F6E00786D5C /* ClipAITests */,
+				D9F58AD52E388F6E00786D5C /* ClipAIUITests */,
+				D9F58AB82E388F6C00786D5C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D9F58AB82E388F6C00786D5C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D9F58AB72E388F6C00786D5C /* ClipAI.app */,
+				D9F58AC82E388F6E00786D5C /* ClipAITests.xctest */,
+				D9F58AD22E388F6E00786D5C /* ClipAIUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D9F58AB62E388F6C00786D5C /* ClipAI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D9F58ADC2E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAI" */;
+			buildPhases = (
+				D9F58AB32E388F6C00786D5C /* Sources */,
+				D9F58AB42E388F6C00786D5C /* Frameworks */,
+				D9F58AB52E388F6C00786D5C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D9F58AB92E388F6C00786D5C /* ClipAI */,
+			);
+			name = ClipAI;
+			packageProductDependencies = (
+				D9F58AE62E38928900786D5C /* HotKey */,
+				D98308002E3D172D00182E00 /* SQLite */,
+				D98308892E3E2B4C00182E00 /* HighlightSwift */,
+				D93EA8212E3FCF45000710F9 /* OpenAI */,
+				D93EA84B2E3FD743000710F9 /* KeychainSwift */,
+				D9144B8F2E46278A00C97DB1 /* LaunchAtLogin */,
+			);
+			productName = ClipAI;
+			productReference = D9F58AB72E388F6C00786D5C /* ClipAI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D9F58AC72E388F6E00786D5C /* ClipAITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D9F58ADF2E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAITests" */;
+			buildPhases = (
+				D9F58AC42E388F6E00786D5C /* Sources */,
+				D9F58AC52E388F6E00786D5C /* Frameworks */,
+				D9F58AC62E388F6E00786D5C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D9F58ACA2E388F6E00786D5C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D9F58ACB2E388F6E00786D5C /* ClipAITests */,
+			);
+			name = ClipAITests;
+			packageProductDependencies = (
+			);
+			productName = ClipAITests;
+			productReference = D9F58AC82E388F6E00786D5C /* ClipAITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D9F58AD12E388F6E00786D5C /* ClipAIUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D9F58AE22E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAIUITests" */;
+			buildPhases = (
+				D9F58ACE2E388F6E00786D5C /* Sources */,
+				D9F58ACF2E388F6E00786D5C /* Frameworks */,
+				D9F58AD02E388F6E00786D5C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D9F58AD42E388F6E00786D5C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D9F58AD52E388F6E00786D5C /* ClipAIUITests */,
+			);
+			name = ClipAIUITests;
+			packageProductDependencies = (
+			);
+			productName = ClipAIUITests;
+			productReference = D9F58AD22E388F6E00786D5C /* ClipAIUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D9F58AAF2E388F6C00786D5C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					D9F58AB62E388F6C00786D5C = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					D9F58AC72E388F6E00786D5C = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D9F58AB62E388F6C00786D5C;
+					};
+					D9F58AD12E388F6E00786D5C = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D9F58AB62E388F6C00786D5C;
+					};
+				};
+			};
+			buildConfigurationList = D9F58AB22E388F6C00786D5C /* Build configuration list for PBXProject "ClipAI" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D9F58AAE2E388F6C00786D5C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D9F58AE52E38928900786D5C /* XCRemoteSwiftPackageReference "HotKey" */,
+				D98307FF2E3D172C00182E00 /* XCRemoteSwiftPackageReference "SQLite" */,
+				D98308882E3E2B4C00182E00 /* XCRemoteSwiftPackageReference "HighlightSwift" */,
+				D93EA8202E3FCF45000710F9 /* XCRemoteSwiftPackageReference "OpenAI" */,
+				D93EA84A2E3FD743000710F9 /* XCRemoteSwiftPackageReference "keychain-swift" */,
+				D9144B8E2E46278A00C97DB1 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D9F58AB82E388F6C00786D5C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D9F58AB62E388F6C00786D5C /* ClipAI */,
+				D9F58AC72E388F6E00786D5C /* ClipAITests */,
+				D9F58AD12E388F6E00786D5C /* ClipAIUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D9F58AB52E388F6C00786D5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58AC62E388F6E00786D5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58AD02E388F6E00786D5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D9F58AB32E388F6C00786D5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58AC42E388F6E00786D5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9F58ACE2E388F6E00786D5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D9F58ACA2E388F6E00786D5C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D9F58AB62E388F6C00786D5C /* ClipAI */;
+			targetProxy = D9F58AC92E388F6E00786D5C /* PBXContainerItemProxy */;
+		};
+		D9F58AD42E388F6E00786D5C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D9F58AB62E388F6C00786D5C /* ClipAI */;
+			targetProxy = D9F58AD32E388F6E00786D5C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D9F58ADA2E388F6E00786D5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D9F58ADB2E388F6E00786D5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		D9F58ADD2E388F6E00786D5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ClipAI/ClipAI.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ClipAI/Preview Content\"";
+				DEVELOPMENT_TEAM = 8VVP6SK9UU;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D9F58ADE2E388F6E00786D5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ClipAI/ClipAI.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ClipAI/Preview Content\"";
+				DEVELOPMENT_TEAM = 8VVP6SK9UU;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D9F58AE02E388F6E00786D5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HUXH9FMT59;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClipAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClipAI";
+			};
+			name = Debug;
+		};
+		D9F58AE12E388F6E00786D5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HUXH9FMT59;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClipAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClipAI";
+			};
+			name = Release;
+		};
+		D9F58AE32E388F6E00786D5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HUXH9FMT59;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAIUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ClipAI;
+			};
+			name = Debug;
+		};
+		D9F58AE42E388F6E00786D5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HUXH9FMT59;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.michaelh.ClipAIUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ClipAI;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D9F58AB22E388F6C00786D5C /* Build configuration list for PBXProject "ClipAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D9F58ADA2E388F6E00786D5C /* Debug */,
+				D9F58ADB2E388F6E00786D5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D9F58ADC2E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D9F58ADD2E388F6E00786D5C /* Debug */,
+				D9F58ADE2E388F6E00786D5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D9F58ADF2E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D9F58AE02E388F6E00786D5C /* Debug */,
+				D9F58AE12E388F6E00786D5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D9F58AE22E388F6E00786D5C /* Build configuration list for PBXNativeTarget "ClipAIUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D9F58AE32E388F6E00786D5C /* Debug */,
+				D9F58AE42E388F6E00786D5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D9144B8E2E46278A00C97DB1 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		D93EA8202E3FCF45000710F9 /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MacPaw/OpenAI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.5;
+			};
+		};
+		D93EA84A2E3FD743000710F9 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
+		D98307FF2E3D172C00182E00 /* XCRemoteSwiftPackageReference "SQLite" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.15.4;
+			};
+		};
+		D98308882E3E2B4C00182E00 /* XCRemoteSwiftPackageReference "HighlightSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/appstefan/HighlightSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.9;
+			};
+		};
+		D9F58AE52E38928900786D5C /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D9144B8F2E46278A00C97DB1 /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D9144B8E2E46278A00C97DB1 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
+		};
+		D93EA8212E3FCF45000710F9 /* OpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D93EA8202E3FCF45000710F9 /* XCRemoteSwiftPackageReference "OpenAI" */;
+			productName = OpenAI;
+		};
+		D93EA84B2E3FD743000710F9 /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D93EA84A2E3FD743000710F9 /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
+		};
+		D98308002E3D172D00182E00 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D98307FF2E3D172C00182E00 /* XCRemoteSwiftPackageReference "SQLite" */;
+			productName = SQLite;
+		};
+		D98308892E3E2B4C00182E00 /* HighlightSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D98308882E3E2B4C00182E00 /* XCRemoteSwiftPackageReference "HighlightSwift" */;
+			productName = HighlightSwift;
+		};
+		D9F58AE62E38928900786D5C /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D9F58AE52E38928900786D5C /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D9F58AAF2E388F6C00786D5C /* Project object */;
+}

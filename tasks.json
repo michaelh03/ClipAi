@@ -1,0 +1,115 @@
+{
+  "general_settings": {
+    "tasks": [
+      {
+        "id": "general_tab_scaffold",
+        "name": "Add General tab scaffold to settings",
+        "description": "Add a new 'General' tab entry to the settings using `CustomTabView` and include a placeholder view.",
+        "files": [
+          "ClipAI/Views/Settings/LLMSettingsView.swift"
+        ],
+        "status": "completed"
+      },
+      {
+        "id": "create_general_view_files",
+        "name": "Create GeneralSettingsView and ViewModel scaffolds",
+        "description": "Create `GeneralSettingsView.swift` and `GeneralSettingsViewModel.swift` with basic layout (Shortcuts and Startup sections) and bindable properties (without functionality).",
+        "files": [
+          "ClipAI/Views/Settings/GeneralSettingsView.swift",
+          "ClipAI/ViewModels/GeneralSettingsViewModel.swift"
+        ],
+        "status": "completed"
+      },
+      {
+        "id": "shortcut_spec_and_persistence",
+        "name": "Implement ShortcutSpec model and persistence helpers",
+        "description": "Define `ShortcutSpec` (Codable, Equatable) and add helpers to load/save from `UserDefaults` under `general.showShortcut` and `general.oneClickShortcut`.",
+        "files": [
+          "ClipAI/Model/ShortcutSpec.swift",
+          "ClipAI/Services/SettingsStorage.swift"
+        ],
+        "status": "completed"
+      },
+      {
+        "id": "hotkeylistener_refactor",
+        "name": "Refactor HotKeyListener for dynamic registration",
+        "description": "Add update methods to register/unregister hotkeys at runtime, expose defaults, and align One-Click AI default to ⌃⌘⌥V.",
+        "files": [
+          "ClipAI/Services/HotKeyListener.swift"
+        ],
+        "status": "completed"
+      },
+      {
+        "id": "shortcut_recorder_ui",
+        "name": "Implement Shortcut Recorder control",
+        "description": "Implement a SwiftUI recorder using `NSViewRepresentable` to capture key combos and format display strings.",
+        "files": [
+          "ClipAI/Views/Settings/Components/ShortcutRecorderView.swift"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "validation_and_conflicts",
+        "name": "Add validation and conflict detection",
+        "description": "Enforce modifier rules, prevent duplicate combos between actions, and warn on system-reserved shortcuts.",
+        "files": [
+          "ClipAI/ViewModels/GeneralSettingsViewModel.swift"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "start_at_login_integration",
+        "name": "Integrate Start at Login",
+        "description": "Add `LaunchAtLogin` SPM dependency and bind toggle directly to `LaunchAtLogin.isEnabled`.",
+        "files": [
+          "ClipAI/Views/Settings/GeneralSettingsView.swift",
+          "ClipAI/ViewModels/GeneralSettingsViewModel.swift",
+          "ClipAI.xcodeproj/project.pbxproj"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "runtime_application",
+        "name": "Apply and persist shortcuts at runtime",
+        "description": "On change, update hotkeys immediately. On launch, read preferences and register. Provide fallback to defaults.",
+        "files": [
+          "ClipAI/ViewModels/GeneralSettingsViewModel.swift",
+          "ClipAI/Services/HotKeyListener.swift"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "defaults_and_migration",
+        "name": "Defaults and migration handling",
+        "description": "Introduce defaults (Show: ⌃⌘V, One-Click: ⌃⌘⌥V) and migrate or fallback if stored values are missing/malformed.",
+        "files": [
+          "ClipAI/ViewModels/GeneralSettingsViewModel.swift",
+          "ClipAI/Services/SettingsStorage.swift"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "unit_tests",
+        "name": "Add unit tests for parsing and persistence",
+        "description": "Cover modifier bitmask mapping and `UserDefaults` round-trip for `ShortcutSpec`.",
+        "files": [
+          "ClipAITests/ClipboardStoreTests.swift",
+          "ClipAITests/ClipAITests.swift"
+        ],
+        "status": "pending"
+      },
+      {
+        "id": "qa_polish",
+        "name": "QA and polish",
+        "description": "Manual verification of shortcuts, conflicts, and Start at Login; finalize copy and defaults in UI.",
+        "files": [
+          "ClipAI/Views/Settings/GeneralSettingsView.swift",
+          "docs/general_settings_plan.md"
+        ],
+        "status": "pending"
+      }
+    ],
+    "current_task": "shortcut_recorder_ui",
+    "last_updated": "2025-08-08T12:15:00Z"
+  }
+}
