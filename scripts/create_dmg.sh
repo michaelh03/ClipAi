@@ -25,6 +25,9 @@ CREATE_DMG_BIN="${CREATE_DMG_BIN:-}"
 
 XCODE_PROJECT="${REPO_ROOT}/ClipAI.xcodeproj"
 
+# Build number set to date of build in format YYYYMMDDHHSS
+BUILD_NUMBER_DATE="$(date +"%Y%m%d%H%S")"
+
 # Auto-detect create-dmg if not provided via CREATE_DMG_BIN
 if [[ -z "${CREATE_DMG_BIN}" ]]; then
   CANDIDATES=(
@@ -64,7 +67,7 @@ xcodebuild \
   -derivedDataPath "${DERIVED_DATA_PATH}" \
   -destination 'generic/platform=macOS' \
   clean build \
-  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CURRENT_PROJECT_VERSION="${BUILD_NUMBER_DATE}"
 
 APP_PATH="${DERIVED_DATA_PATH}/Build/Products/${CONFIGURATION}/${SCHEME}.app"
 if [[ ! -d "${APP_PATH}" ]]; then
@@ -74,9 +77,12 @@ fi
 
 echo "[2/3] Preparing DMG metadata…"
 INFO_PLIST="${APP_PATH}/Contents/Info.plist"
+# Ensure CFBundleVersion is the date-based build number
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER_DATE}" "${INFO_PLIST}" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string ${BUILD_NUMBER_DATE}" "${INFO_PLIST}"
 VERSION="$((/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "${INFO_PLIST}" 2>/dev/null) || true)"
 BUILD_NUMBER="$((/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "${INFO_PLIST}" 2>/dev/null) || true)"
 [[ -z "${VERSION}" ]] && VERSION="0.0.0"
+[[ -z "${BUILD_NUMBER}" ]] && BUILD_NUMBER="${BUILD_NUMBER_DATE}"
 
 DMG_BASENAME="${SCHEME}-${VERSION}"
 if [[ -n "${BUILD_NUMBER}" ]]; then
