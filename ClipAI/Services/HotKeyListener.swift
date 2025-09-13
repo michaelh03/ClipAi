@@ -16,22 +16,21 @@ class HotKeyListener {
     /// Default: ⌃⌘⌥1
     static let defaultOneClickShortcut1 = ShortcutSpec(
         keyCode: Int(kVK_ANSI_1),
-        modifiers: Int(cmdKey | controlKey | optionKey),
-        display: "⌃⌘⌥1"
+        modifiers: Int(cmdKey | optionKey),
+        display: "⌘⌥1"
     )
     
     /// Default: ⌃⌘⌥2
     static let defaultOneClickShortcut2 = ShortcutSpec(
         keyCode: Int(kVK_ANSI_2),
-        modifiers: Int(cmdKey | controlKey | optionKey),
-        display: "⌃⌘⌥2"
+        modifiers: Int(cmdKey | optionKey),
+        display: "⌘⌥2"
     )
-    
-    /// Default: ⌃⌘⌥3
+    /// Default: ⌘⌥3
     static let defaultOneClickShortcut3 = ShortcutSpec(
         keyCode: Int(kVK_ANSI_3),
-        modifiers: Int(cmdKey | controlKey | optionKey),
-        display: "⌃⌘⌥3"
+        modifiers: Int(cmdKey | optionKey),
+        display: "⌘⌥3"
     )
     
     /// Legacy default for migration: ⌃⌘⌥V
