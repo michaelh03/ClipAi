@@ -82,6 +82,19 @@ class PopupController: NSWindowController {
     self.popupViewModel?.closeRequestedHandler = {
       self.hidePopup()
     }
+    self.popupViewModel?.pasteRequestedHandler = { [weak self] in
+      guard let self = self else { return }
+      // Hide popup, restore previous app, then emit Cmd+V
+      let previousApp = self.previouslyFrontmostApp
+      self.hidePopup()
+      // Small delay to allow focus to settle on the previous app
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        if let app = previousApp {
+          _ = app.activate(options: [])
+        }
+        Self.sendPasteKeystroke()
+      }
+    }
 
     // Create the SwiftUI view with the injected view model and fade out callback
     let popupView = PopupView(viewModel: viewModel) { [weak self] in
@@ -93,6 +106,21 @@ class PopupController: NSWindowController {
     // Set the hosting view as the window's content view
     window.contentView = hostingView
 
+  }
+
+  /// Programmatically sends Cmd+V to paste in the focused application
+  private static func sendPasteKeystroke() {
+    let commandFlag: CGEventFlags = .maskCommand
+    // Key down for 'v'
+    if let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true) { // 9 = kVK_ANSI_V
+      keyDown.flags = commandFlag
+      keyDown.post(tap: .cghidEventTap)
+    }
+    // Key up for 'v'
+    if let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false) {
+      keyUp.flags = commandFlag
+      keyUp.post(tap: .cghidEventTap)
+    }
   }
 
   /// Show the popup window centered on the main screen

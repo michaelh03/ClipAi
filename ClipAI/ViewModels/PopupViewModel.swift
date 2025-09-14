@@ -28,6 +28,8 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   
   var itemSelectedHandler: (() -> Void)?
   var closeRequestedHandler: (() -> Void)?
+  /// Callback to request pasting into the previously active app
+  var pasteRequestedHandler: (() -> Void)?
   
   /// Published property to trigger search field focus
   @Published var shouldFocusSearchField: Bool = false
@@ -157,7 +159,9 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
       case 36, 76: // Return/Enter
         if let selectedId = selectedItemId,
            let selectedItem = filteredItems.first(where: { $0.id == selectedId }) {
-          copyItemToClipboard(selectedItem)
+          // Copy without fade-out, then request paste in the front app
+          copyItemToClipboard(selectedItem, triggerFadeOut: false)
+          pasteRequestedHandler?()
         }
         return true
 
@@ -230,7 +234,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   // MARK: - Clipboard Operations
 
   /// Copy item to clipboard with visual feedback
-  func copyItemToClipboard(_ item: ClipItem) {
+  func copyItemToClipboard(_ item: ClipItem, triggerFadeOut: Bool = true) {
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
     pasteboard.setString(item.content, forType: .string)
@@ -238,10 +242,12 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
     // Brief visual feedback before fade out
     selectedItemId = item.id
 
-    // Trigger fade out animation after brief delay for visual feedback
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-      print("🎬 PopupViewModel: Triggering fade out animation")
-      self.shouldTriggerFadeOut = true
+    if triggerFadeOut {
+      // Trigger fade out animation after brief delay for visual feedback
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        print("🎬 PopupViewModel: Triggering fade out animation")
+        self.shouldTriggerFadeOut = true
+      }
     }
   }
 
