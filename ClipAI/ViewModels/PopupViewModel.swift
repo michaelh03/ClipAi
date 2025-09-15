@@ -159,9 +159,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
       case 36, 76: // Return/Enter
         if let selectedId = selectedItemId,
            let selectedItem = filteredItems.first(where: { $0.id == selectedId }) {
-          // Copy without fade-out, then request paste in the front app
-          copyItemToClipboard(selectedItem, triggerFadeOut: false)
-          pasteRequestedHandler?()
+          copyItemToClipboard(selectedItem)
         }
         return true
 
@@ -234,7 +232,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   // MARK: - Clipboard Operations
 
   /// Copy item to clipboard with visual feedback
-  func copyItemToClipboard(_ item: ClipItem, triggerFadeOut: Bool = true) {
+  func copyItemToClipboard(_ item: ClipItem) {
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
     pasteboard.setString(item.content, forType: .string)
@@ -242,12 +240,10 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
     // Brief visual feedback before fade out
     selectedItemId = item.id
 
-    if triggerFadeOut {
-      // Trigger fade out animation after brief delay for visual feedback
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-        print("🎬 PopupViewModel: Triggering fade out animation")
-        self.shouldTriggerFadeOut = true
-      }
+    // Trigger fade out animation after brief delay for visual feedback
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+      print("🎬 PopupViewModel: Triggering fade out animation")
+      self.shouldTriggerFadeOut = true
     }
   }
 

@@ -282,9 +282,16 @@ struct BasicTextPreviewProvider: ClipItemPreviewProvider {
     }
     
     func createPreview(for item: ClipItem, generalSettingsViewModel: GeneralSettingsViewModel) -> AnyView {
+        let truncatedContent: String = {
+            let content = item.content
+            let limit = PreviewConfig.maxPreviewCharacters
+            if content.count <= limit { return content }
+            return String(content.prefix(limit)) + "…"
+        }()
+        
         return AnyView(
             VStack(alignment: .leading, spacing: 8) {
-                Text(item.content)
+                Text(truncatedContent)
                     .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
                     .foregroundColor(.primary)
                     .textSelection(.enabled)
@@ -299,7 +306,7 @@ struct BasicTextPreviewProvider: ClipItemPreviewProvider {
                     
                     Spacer()
                     
-                    Text("\(item.content.count) characters")
+                    Text("\(min(item.content.count, PreviewConfig.maxPreviewCharacters)) characters")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

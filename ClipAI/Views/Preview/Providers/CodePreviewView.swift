@@ -21,6 +21,15 @@ struct CodePreviewView: View {
     /// Code confidence from HighlightSwift
     @State private var codeConfidence: Double = 0.8
     
+    /// Truncated content used for rendering the preview
+    private var truncatedContent: String {
+        let limit = PreviewConfig.maxPreviewCharacters
+        if item.content.count <= limit {
+            return item.content
+        }
+        return String(item.content.prefix(limit)) + "…"
+    }
+    
     var body: some View {
         mainContainer
     }
@@ -94,10 +103,10 @@ struct CodePreviewView: View {
     private var codeTextView: some View {
         Group {
             if let colorScheme = colorSchemeForTheme(generalSettingsViewModel.previewTheme) {
-                CodeText(item.content)
+                CodeText(truncatedContent)
                     .colorScheme(colorScheme)
             } else {
-                CodeText(item.content)
+                CodeText(truncatedContent)
             }
         }
         .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
@@ -125,7 +134,7 @@ struct CodePreviewView: View {
                 GridItem(.flexible())
             ], alignment: .leading, spacing: 8) {
                 statisticItem("Language", value: detectedLanguage ?? "Unknown")
-                statisticItem("Characters", value: item.content.count)
+                statisticItem("Characters", value: min(item.content.count, PreviewConfig.maxPreviewCharacters))
                 statisticItem("Lines", value: lineCount)
                 statisticItem("Code Confidence", value: "\(Int(codeConfidence * 100))%")
             }
@@ -150,7 +159,7 @@ struct CodePreviewView: View {
     
     /// Line count calculation
     private var lineCount: Int {
-        return item.content.components(separatedBy: .newlines).count
+        return truncatedContent.components(separatedBy: .newlines).count
     }
     
     /// Convert theme string to ColorScheme
