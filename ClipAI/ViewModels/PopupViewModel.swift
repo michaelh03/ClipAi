@@ -108,7 +108,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
     startKeyboardMonitoring()
 
     $selectedItemId
-      .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
+      .debounce(for: .seconds(0.1), scheduler: DispatchQueue.main)
       .sink { [weak self] _ in
         self?.updatePreviewSelection()
       }.store(in: &cancellables)
@@ -173,6 +173,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
         if let selectedId = selectedItemId,
            let selectedItem = filteredItems.first(where: { $0.id == selectedId }) {
           copyItemToClipboard(selectedItem)
+          pasteRequestedHandler?()
         }
         return true
 
