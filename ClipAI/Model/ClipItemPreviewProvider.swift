@@ -298,18 +298,6 @@ struct BasicTextPreviewProvider: ClipItemPreviewProvider {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Divider()
-                
-                HStack {
-                    Text("Plain Text")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("\(min(item.content.count, PreviewConfig.maxPreviewCharacters)) characters")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .padding()
