@@ -37,7 +37,7 @@ class PromptStore: ObservableObject {
     // MARK: - Singleton
     
     static let shared = PromptStore()
-    
+
     private init() {
         do {
             // Initialize database connection
@@ -47,7 +47,7 @@ class PromptStore: ObservableObject {
             }
             
             let clipAIDirectory = applicationSupportURL.appendingPathComponent("ClipAI")
-            let databaseURL = clipAIDirectory.appendingPathComponent("promptsV6.sqlite")
+            let databaseURL = clipAIDirectory.appendingPathComponent("promptsV7.sqlite")
             
             // Create directory if it doesn't exist
             try FileManager.default.createDirectory(at: clipAIDirectory, 

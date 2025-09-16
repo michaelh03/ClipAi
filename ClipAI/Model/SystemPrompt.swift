@@ -136,8 +136,8 @@ extension SystemPrompt {
     static let defaultPrompts: [SystemPrompt] = [
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-            title: "Rewrite Sentence",
-            template: "<tech_user><command>rewrite this in 1 sentences</command><context>technical note description for code review or comments, make this not too formal and do it in a short way. check grammer and spelling</context><format>plain text</format><important>rewrite without missing details</important><text>{input}</text></tech_user>",
+            title: "Tech Rewrite",
+            template: "<task>\nRewrite the text for concise, friendly professional communication suitable for Slack, JIRA, or other technical tools.\n</task>\n\n<guidelines>\n- Correct all spelling and grammar\n- Preserve key meaning and details; remove filler\n- Use a friendly, cooperative tone; not overly formal\n- Keep it short (1–3 sentences)\n- Avoid emojis unless already present in input\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\nOutput only the rewritten text.\n</format>",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
@@ -145,23 +145,15 @@ extension SystemPrompt {
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
             title: "Code Review",
-            template: "<task>\nReview the following code and provide concise suggestions for improvement.\n</task>\n\n<guidelines>\n- Focus on the most important improvements\n- Keep suggestions short and actionable\n- Consider: readability, performance, best practices, potential bugs\n- Provide specific recommendations\n- Be constructive and helpful\n</guidelines>\n\n<code>\n{input}\n</code>\n\n<format>\nProvide your review in this format:\n- **Issue/Suggestion**: Brief description\n- **Improvement**: Specific recommendation\n</format>",
+            template: "<task>\nAnalyze the following code and list concrete issues.\n</task>\n\n<guidelines>\n- Include bugs, errors, security risks, performance problems, readability and maintainability concerns\n- Be specific and actionable\n- One issue per bullet; keep each to one sentence\n- Optionally include a severity tag prefix: [Bug], [Security], [Perf], [Style], [Maintainability], [Test]\n- If no issues are found, output \"No issues found.\"\n</guidelines>\n\n<code>\n{input}\n</code>\n\n<format>\n- [Severity] Issue description\n</format>",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
         ),
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
-            title: "Slack Message",
-            template: "<task>\nFormat the following text as a concise Slack message.\n</task>\n\n<guidelines>\n- Make it conversational and friendly\n- Keep it brief and to the point\n- Use appropriate Slack tone (casual but professional)\n- Add relevant emojis if helpful\n- Structure for easy reading\n- Remove unnecessary formalities\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\nOutput only the formatted Slack message, ready to send.\n</format>",
-            isSystemPrompt: true,
-            createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
-            modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
-        ),
-        SystemPrompt(
-            id: UUID(uuidString: "00000000-0000-0000-0000-000000000004")!,
-            title: "Email Format",
-            template: "<task>\nFormat the following text as a professional email.\n</task>\n\n<guidelines>\n- Add appropriate subject line\n- Include proper greeting and closing\n- Structure with clear paragraphs\n- Use professional but friendly tone\n- Make it well-organized and easy to read\n- Include call-to-action if needed\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\n**Subject:** [Generated subject line]\n\n[Formatted email body with proper greeting, content, and closing]\n</format>",
+            title: "Formal Email",
+            template: "<task>\nTransform the following notes into a formal, professional email.\n</task>\n\n<guidelines>\n- Create a clear subject line\n- Include greeting, concise body, and courteous closing\n- Use a professional tone\n- Organize with short paragraphs\n- Include call-to-action or next steps if present in input\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\nSubject: [Generated subject]\n\n[Email body]\n</format>",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
