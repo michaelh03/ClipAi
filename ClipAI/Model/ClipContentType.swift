@@ -174,7 +174,8 @@ extension ClipContentType {
     /// - Returns: The detected content type, defaults to plainText if no specific type matches
     static func detect(from content: String) -> ClipContentType {
         // Use the sophisticated ContentTypeDetector for accurate detection
-        return ContentTypeDetector.shared.detectContentType(for: content)
+        let previewText = String(content.prefix(PreviewConfig.maxPreviewCharacters))
+        return ContentTypeDetector.shared.detectContentType(for: previewText)
     }
     
     /// Get all applicable content types with confidence scores

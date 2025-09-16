@@ -231,10 +231,12 @@ class CodeDetector {
     /// - Parameter text: The text to analyze
     /// - Returns: True if the text appears to be code
     func isCode(_ text: String) -> Bool {
-        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let previewContent = String(text.prefix(PreviewConfig.maxPreviewCharacters))
+        let trimmedText = previewContent.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else { return false }
         
         // Quick checks for obvious code patterns
+      
         if hasCodeStructure(trimmedText) {
             return true
         }

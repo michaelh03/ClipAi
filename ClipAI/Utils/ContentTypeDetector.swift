@@ -53,15 +53,15 @@ class ContentTypeDetector {
         }
         
         // Detect in order of specificity (most specific first)
-        if detectColor(text) {
+        if detectColor(trimmedText) {
             return .color
         }
         
-        if detectJSON(text) {
+        if detectJSON(trimmedText) {
             return .json
         }
         
-        if detectCode(text) {
+        if detectCode(trimmedText) {
             return .code
         }
         
