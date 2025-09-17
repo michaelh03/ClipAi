@@ -151,9 +151,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func showAbout() {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
         let alert = NSAlert()
         alert.messageText = "About ClipAI"
-        alert.informativeText = "ClipAI - A smart clipboard manager for macOS\nVersion 1.0\n\nKeep your clipboard history at your fingertips."
+        alert.informativeText = "ClipAI - A smart clipboard manager for macOS\nVersion \(version) (Build \(build))\n\nKeep your clipboard history at your fingertips."
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
