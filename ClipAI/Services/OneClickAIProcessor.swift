@@ -49,11 +49,20 @@ final class OneClickAIProcessor {
         let processedSystemPrompt = systemPrompt.processTemplate(with: content)
 
         let requestManager = LLMRequestManager()
+		// Resolve user-selected model for the default provider (if any)
+		let defaultProviderId = await providerRegistry.getDefaultProviderId()
+		let selectedModel: String? = {
+			guard let providerId = defaultProviderId else { return nil }
+			let selected = UserDefaults.standard.dictionary(forKey: "selectedModels") as? [String: String] ?? [:]
+			return selected[providerId]
+		}()
         let response = try await requestManager.sendRequest(
             provider: defaultProvider,
             prompt: content,
-            systemPrompt: processedSystemPrompt
+			systemPrompt: processedSystemPrompt,
+			model: selectedModel
         )
+      
 
         // Write response to system clipboard
         let pasteboard = NSPasteboard.general

@@ -615,6 +615,12 @@ class LLMSettingsViewModel: ObservableObject {
         switch providerId {
         case "openai":
             switch modelId {
+            case "gpt-5":
+                return "Latest flagship GPT-5 with advanced reasoning"
+            case "gpt-5-mini":
+                return "Smaller, cost-effective GPT-5 variant"
+            case "gpt-5-nano":
+                return "Lightweight GPT-5 for fastest responses"
             case "gpt-4o":
                 return "Most advanced GPT-4 model with improved capabilities"
             case "gpt-4-turbo":

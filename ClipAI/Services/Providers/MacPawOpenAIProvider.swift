@@ -164,11 +164,16 @@ class MacPawOpenAIProvider: LLMProvider {
     
     func availableModels() -> [String] {
         return [
+          Model.gpt5,
+          Model.gpt5_mini,
+          Model.gpt5_nano,
           Model.gpt4_1_mini,
           Model.gpt4_1_nano,
           Model.gpt4_o_mini,
         ]
     }
+  
+  
     
     // MARK: - Private Helper Methods
     
@@ -182,6 +187,12 @@ class MacPawOpenAIProvider: LLMProvider {
         
         // Map common model strings to Model enum
         switch modelString.lowercased() {
+        case "gpt-5":
+            return Model.gpt5
+        case "gpt-5-mini":
+            return Model.gpt5_mini
+        case "gpt-5-nano":
+            return Model.gpt5_nano
         case "gpt4_1_mini":
             return Model.gpt4_1_mini
         case "gpt4_1_nano":
@@ -246,6 +257,12 @@ extension MacPawOpenAIProvider {
     /// - Returns: Display name for the model
     static func displayName(for model: Model) -> String {
         switch model {
+        case "gpt-5":
+            return "GPT-5"
+        case "gpt-5-mini":
+            return "GPT-5 Mini"
+        case "gpt-5-nano":
+            return "GPT-5 Nano"
         case Model.gpt4_o:
             return "GPT-4o"
         case Model.gpt4_turbo:
@@ -268,6 +285,8 @@ extension MacPawOpenAIProvider {
     /// - Returns: true if the model supports function calling
     static func supportsFunctionCalling(model: Model) -> Bool {
         switch model {
+        case "gpt-5", "gpt-5-mini", "gpt-5-nano":
+            return true
         case Model.gpt4_o, Model.gpt4_turbo, Model.gpt4, Model.gpt4_1106_preview, Model.gpt4_0125_preview:
             return true
         case Model.gpt3_5Turbo:
@@ -282,6 +301,8 @@ extension MacPawOpenAIProvider {
     /// - Returns: Maximum context length in tokens
     static func maxContextLength(for model: Model) -> Int {
         switch model {
+        case "gpt-5", "gpt-5-mini", "gpt-5-nano":
+            return 128000
         case Model.gpt4_o:
             return 128000
         case Model.gpt4_turbo, Model.gpt4_1106_preview, Model.gpt4_0125_preview:
