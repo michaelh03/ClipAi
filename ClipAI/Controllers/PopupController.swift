@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ApplicationServices
 
 /// Custom NSWindow that can become key window
 class PopupWindow: NSWindow {
@@ -84,17 +85,37 @@ class PopupController: NSWindowController {
     }
     self.popupViewModel?.pasteRequestedHandler = { [weak self] in
       guard let self = self else { return }
-      // Hide popup, restore previous app, then emit Cmd+V
+      // Capture the previous app before hiding popup
       let previousApp = self.previouslyFrontmostApp
-      self.hidePopup()
-      // Small delay to allow focus to settle on the previous app
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+      
+      // Hide popup without restoring focus (we'll handle focus ourselves)
+      self.hidePastePopup()
+      
+      // Delay to allow popup to fully hide
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
         if let app = previousApp {
-          _ = app.activate(options: [])
+          // Use proper activation options to ensure focus
+          _ = app.activate(options: [.activateIgnoringOtherApps])
+          
+          // Additional delay to ensure the app is ready to receive input
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            Self.sendPasteKeystroke()
+            // Clear the reference after paste operation is complete
+            self.previouslyFrontmostApp = nil
+          }
+        } else {
+          AppLog("PopupController: No previous app to restore focus to", level: .warning, category: "Popup")
+          // Still try to send the keystroke to current frontmost app
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            Self.sendPasteKeystroke()
+          }
         }
-        Self.sendPasteKeystroke()
       }
     }
+    
+    
+    
+    
 
     // Create the SwiftUI view with the injected view model and fade out callback
     let popupView = PopupView(viewModel: viewModel) { [weak self] in
@@ -108,8 +129,28 @@ class PopupController: NSWindowController {
 
   }
 
+  /// Check if accessibility permissions are granted
+  private static func hasAccessibilityPermissions() -> Bool {
+    // AXIsProcessTrusted returns true if accessibility is enabled for this app
+    return AXIsProcessTrusted()
+  }
+  
   /// Programmatically sends Cmd+V to paste in the focused application
   private static func sendPasteKeystroke() {
+    AppLog("PopupController: Attempting to send paste keystroke", level: .info, category: "Popup")
+    
+    // Check if we have accessibility permissions first
+    if hasAccessibilityPermissions() {
+      AppLog("PopupController: Using CGEvent method (accessibility enabled)", level: .debug, category: "Popup")
+      sendPasteKeystrokeViaCGEvent()
+    } else {
+      AppLog("PopupController: Using AppleScript method (no accessibility permissions)", level: .debug, category: "Popup")
+      sendPasteKeystrokeViaAppleScript()
+    }
+  }
+  
+  /// Send paste keystroke using CGEvent (requires accessibility permissions)
+  private static func sendPasteKeystrokeViaCGEvent() {
     let commandFlag: CGEventFlags = .maskCommand
     // Key down for 'v'
     if let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true) { // 9 = kVK_ANSI_V
@@ -120,6 +161,45 @@ class PopupController: NSWindowController {
     if let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false) {
       keyUp.flags = commandFlag
       keyUp.post(tap: .cghidEventTap)
+    }
+  }
+  
+  /// Send paste keystroke using AppleScript (fallback method)
+  private static func sendPasteKeystrokeViaAppleScript() {
+    let script = """
+    tell application "System Events"
+        keystroke "v" using command down
+    end tell
+    """
+    
+    var error: NSDictionary?
+    if let appleScript = NSAppleScript(source: script) {
+      appleScript.executeAndReturnError(&error)
+      if let error = error {
+        AppLog("PopupController: AppleScript paste failed - \(error)", level: .error, category: "Popup")
+        // Show alert to user about accessibility permissions
+        showAccessibilityPermissionAlert()
+      } else {
+        AppLog("PopupController: AppleScript paste executed successfully", level: .debug, category: "Popup")
+      }
+    }
+  }
+  
+  /// Show alert to help user enable accessibility permissions
+  private static func showAccessibilityPermissionAlert() {
+    let alert = NSAlert()
+    alert.messageText = "Accessibility Permission Required"
+    alert.informativeText = "ClipAI needs accessibility permissions to paste content into other applications. Please grant permission in System Preferences > Security & Privacy > Privacy > Accessibility."
+    alert.alertStyle = .informational
+    alert.addButton(withTitle: "Open System Preferences")
+    alert.addButton(withTitle: "Cancel")
+    
+    let response = alert.runModal()
+    if response == .alertFirstButtonReturn {
+      // Open System Preferences to Accessibility section
+      if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+        NSWorkspace.shared.open(url)
+      }
     }
   }
 
@@ -178,6 +258,16 @@ class PopupController: NSWindowController {
       _ = previousApp.activate(options: [])
     }
     previouslyFrontmostApp = nil
+  }
+  
+  /// Hide the popup window for paste operations without restoring focus
+  private func hidePastePopup() {
+    AppLog("PopupController: hidePastePopup called", level: .info, category: "Popup")
+    stopMonitoringForOutsideClicks()
+    popupViewModel?.searchText = ""
+    window?.orderOut(nil)
+    // Note: We don't restore focus here or clear previouslyFrontmostApp 
+    // because the paste handler will manage focus restoration
   }
 
   /// Toggle popup visibility
