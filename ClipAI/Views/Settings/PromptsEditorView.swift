@@ -329,7 +329,7 @@ struct PromptsEditorView: View {
                 oneClickAIActionRow(
                     action: 1,
                     title: "Action 1",
-                    shortcutDisplay: "⌃⌘⌥1",
+                    shortcutDisplay: viewModel.generalSettingsViewModel.oneClick1ShortcutDisplay,
                     selectedPromptId: Binding(
                         get: { 
                             guard let stringId = viewModel.defaultSystemPromptIds[0] else { return nil }
@@ -346,7 +346,7 @@ struct PromptsEditorView: View {
                 oneClickAIActionRow(
                     action: 2,
                     title: "Action 2",
-                    shortcutDisplay: "⌃⌘⌥2",
+                    shortcutDisplay: viewModel.generalSettingsViewModel.oneClick2ShortcutDisplay,
                     selectedPromptId: Binding(
                         get: { 
                             guard let stringId = viewModel.defaultSystemPromptIds[1] else { return nil }
@@ -363,7 +363,7 @@ struct PromptsEditorView: View {
                 oneClickAIActionRow(
                     action: 3,
                     title: "Action 3",
-                    shortcutDisplay: "⌃⌘⌥3",
+                    shortcutDisplay: viewModel.generalSettingsViewModel.oneClick3ShortcutDisplay,
                     selectedPromptId: Binding(
                         get: { 
                             guard let stringId = viewModel.defaultSystemPromptIds[2] else { return nil }
