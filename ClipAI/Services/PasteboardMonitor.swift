@@ -38,6 +38,7 @@ class PasteboardMonitor: ObservableObject {
     init() {
         // Initialize with current pasteboard state
         lastChangeCount = NSPasteboard.general.changeCount
+        AppLog("PasteboardMonitor: Initialized with changeCount=\(lastChangeCount)", level: .debug, category: "Clipboard")
     }
     
     // MARK: - Public Methods
@@ -48,15 +49,17 @@ class PasteboardMonitor: ObservableObject {
         
         isMonitoring = true
         lastChangeCount = NSPasteboard.general.changeCount
+        AppLog("PasteboardMonitor: Scheduling timer (interval=\(pollingInterval)s), initial changeCount=\(lastChangeCount)", level: .debug, category: "Clipboard")
         
         // Create timer that fires on the main queue
         monitorTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in
+                AppLog("PasteboardMonitor: Timer tick", level: .debug, category: "Clipboard")
                 self?.checkForPasteboardChanges()
             }
         }
         
-        print("PasteboardMonitor: Started monitoring clipboard")
+        AppLog("PasteboardMonitor: Started monitoring clipboard", level: .info, category: "Clipboard")
     }
     
     /// Stop monitoring the pasteboard
@@ -67,26 +70,48 @@ class PasteboardMonitor: ObservableObject {
         monitorTimer = nil
         isMonitoring = false
         
-        print("PasteboardMonitor: Stopped monitoring clipboard")
+        AppLog("PasteboardMonitor: Stopped monitoring clipboard (lastChangeCount=\(lastChangeCount))", level: .info, category: "Clipboard")
     }
     
     /// Manually check for pasteboard changes (useful for testing)
     func checkForPasteboardChanges() {
         let currentChangeCount = NSPasteboard.general.changeCount
+        AppLog("PasteboardMonitor: Checking pasteboard (current=\(currentChangeCount), last=\(lastChangeCount))", level: .debug, category: "Clipboard")
         
         // Check if the pasteboard has changed
-        guard currentChangeCount != lastChangeCount else { return }
+        guard currentChangeCount != lastChangeCount else {
+            AppLog("PasteboardMonitor: No change detected", level: .debug, category: "Clipboard")
+            return
+        }
         
         lastChangeCount = currentChangeCount
+        AppLog("PasteboardMonitor: Change detected, updated lastChangeCount=\(lastChangeCount)", level: .debug, category: "Clipboard")
         
         // Get the current clipboard content
-        guard let clipboardContent = getClipboardText() else { return }
+        AppLog("PasteboardMonitor: Attempting to read clipboard text", level: .debug, category: "Clipboard")
+        guard let clipboardContent = getClipboardText() else {
+            AppLog("PasteboardMonitor: No readable text content found on clipboard", level: .debug, category: "Clipboard")
+            return
+        }
+        let preview = clipboardContent.replacingOccurrences(of: "\n", with: " ")
+        let previewSnippet = String(preview.prefix(80))
+        AppLog("PasteboardMonitor: Clipboard text length=\(clipboardContent.count), preview=\"\(previewSnippet)\"", level: .debug, category: "Clipboard")
         
         // Capture source app information
         let sourceAppMetadata = captureSourceAppMetadata()
+        if let name = sourceAppMetadata["sourceAppName"], let bundle = sourceAppMetadata["sourceAppBundleID"], let pid = sourceAppMetadata["sourceAppPID"] {
+            AppLog("PasteboardMonitor: Source app name=\(name), bundleID=\(bundle), pid=\(pid)", level: .debug, category: "Clipboard")
+        } else {
+            AppLog("PasteboardMonitor: Source app metadata not available", level: .debug, category: "Clipboard")
+        }
         
         // Notify delegate of new content
-        delegate?.pasteboardMonitor(self, didDetectNewContent: clipboardContent, sourceAppMetadata: sourceAppMetadata)
+        if let delegate = delegate {
+            AppLog("PasteboardMonitor: Notifying delegate of new content", level: .debug, category: "Clipboard")
+            delegate.pasteboardMonitor(self, didDetectNewContent: clipboardContent, sourceAppMetadata: sourceAppMetadata)
+        } else {
+            AppLog("PasteboardMonitor: Delegate is nil; dropping clipboard update", level: .warning, category: "Clipboard")
+        }
     }
     
     // MARK: - Private Methods
@@ -98,14 +123,17 @@ class PasteboardMonitor: ObservableObject {
         
         // Check if clipboard contains text
         guard let string = pasteboard.string(forType: .string) else {
+            AppLog("PasteboardMonitor: NSPasteboard has no string for type .string", level: .debug, category: "Clipboard")
             return nil
         }
         
         // Don't return empty or whitespace-only strings
         let trimmedString = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedString.isEmpty else {
+            AppLog("PasteboardMonitor: Clipboard string is empty or whitespace-only; ignoring", level: .debug, category: "Clipboard")
             return nil
         }
+        AppLog("PasteboardMonitor: Clipboard string read successfully (length=\(string.count), trimmedLength=\(trimmedString.count))", level: .debug, category: "Clipboard")
         
         return string
     }
@@ -125,6 +153,9 @@ class PasteboardMonitor: ObservableObject {
             if let bundleURL = frontmostApp.bundleURL {
                 metadata["sourceAppBundlePath"] = bundleURL.path
             }
+            AppLog("PasteboardMonitor: Captured frontmost app metadata", level: .debug, category: "Clipboard")
+        } else {
+            AppLog("PasteboardMonitor: No frontmost application available for metadata", level: .debug, category: "Clipboard")
         }
         
         return metadata
@@ -137,12 +168,15 @@ extension PasteboardMonitor {
     /// Get the current clipboard content without monitoring
     /// - Returns: Current clipboard text content or nil
     func getCurrentClipboardContent() -> String? {
+        AppLog("PasteboardMonitor: getCurrentClipboardContent invoked", level: .debug, category: "Clipboard")
         return getClipboardText()
     }
     
     /// Check if the pasteboard currently contains text
     /// - Returns: True if clipboard contains text content
     func hasTextContent() -> Bool {
-        return NSPasteboard.general.canReadItem(withDataConformingToTypes: [NSPasteboard.PasteboardType.string.rawValue])
+        let result = NSPasteboard.general.canReadItem(withDataConformingToTypes: [NSPasteboard.PasteboardType.string.rawValue])
+        AppLog("PasteboardMonitor: hasTextContent=\(result)", level: .debug, category: "Clipboard")
+        return result
     }
 } 

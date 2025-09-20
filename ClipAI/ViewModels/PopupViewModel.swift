@@ -17,7 +17,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   @Published
   var searchText: String = "" {
     didSet {
-      print("🔍 Search text changed: '\(searchText)' (oldValue: '\(oldValue)')")
+      AppLog("Search text changed: '\(searchText)' (oldValue: '\(oldValue)')", level: .debug, category: "Popup")
       handleSearchTextChanged()
     }
   }
@@ -79,11 +79,11 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   private func updateFilteredItems() {
     let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     if query.isEmpty {
-      print("📝 Returning all \(items.count) items (empty query)")
+      AppLog("Returning all \(items.count) items (empty query)", level: .debug, category: "Popup")
       filteredItems = items
     } else {
       let filtered = items.filter { $0.content.localizedCaseInsensitiveContains(query) }
-      print("📝 Filtered \(items.count) items to \(filtered.count) items for query: '\(query)'")
+      AppLog("Filtered \(items.count) items to \(filtered.count) items for query: '\(query)'", level: .debug, category: "Popup")
       filteredItems = filtered
     }
   }
@@ -256,7 +256,7 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
 
     // Trigger fade out animation after brief delay for visual feedback
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-      print("🎬 PopupViewModel: Triggering fade out animation")
+      AppLog("PopupViewModel: Triggering fade out animation", level: .debug, category: "Popup")
       self.shouldTriggerFadeOut = true
     }
   }
@@ -349,25 +349,25 @@ extension PopupViewModel {
 
   /// Triggers focus on the search field
   func focusSearchField() {
-    print("🎯 PopupViewModel: Triggering search field focus")
+    AppLog("PopupViewModel: Triggering search field focus", level: .debug, category: "Popup")
     shouldFocusSearchField = true
   }
 
   /// Triggers focus on the list
   func focusList() {
-    print("🎯 PopupViewModel: Triggering list focus")
+    AppLog("PopupViewModel: Triggering list focus", level: .debug, category: "Popup")
     shouldFocusList = true
   }
 
   /// Reset fade out state when popup is shown again
   func resetFadeOutState() {
-    print("🔄 PopupViewModel: Resetting fade out state (was: \(shouldTriggerFadeOut))")
+    AppLog("PopupViewModel: Resetting fade out state (was: \(shouldTriggerFadeOut))", level: .debug, category: "Popup")
     shouldTriggerFadeOut = false
   }
 
   /// Called when the popup is about to be shown - ensures first item is always selected
   func onPopupWillShow() {
-    print("🎯 PopupViewModel: Popup will show - selecting first item")
+    AppLog("PopupViewModel: Popup will show - selecting first item", level: .debug, category: "Popup")
     resetFadeOutState()
 
     // Set flag to disable animations for initial selection

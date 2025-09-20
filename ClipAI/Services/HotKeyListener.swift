@@ -98,7 +98,7 @@ class HotKeyListener {
     // MARK: - Public Controls
     /// Enable hotkey registration
     func enable() {
-        print("🟢 Enabling hotkeys - show: \(hotKey != nil), oneClick1: \(oneClickAI1HotKey != nil), oneClick2: \(oneClickAI2HotKey != nil), oneClick3: \(oneClickAI3HotKey != nil)")
+        AppLog("Enabling hotkeys - show: \(hotKey != nil), oneClick1: \(oneClickAI1HotKey != nil), oneClick2: \(oneClickAI2HotKey != nil), oneClick3: \(oneClickAI3HotKey != nil)", level: .info, category: "Hotkeys")
         hotKey?.isPaused = false
         oneClickAI1HotKey?.isPaused = false
         oneClickAI2HotKey?.isPaused = false
@@ -139,10 +139,10 @@ class HotKeyListener {
         // Clean up previous hotkey
         hotKey = nil
         hotKey = makeHotKey(from: spec) { [weak self] in
-            print("🔥 Show hotkey pressed!")
+            AppLog("Show hotkey pressed!", level: .info, category: "Hotkeys")
             self?.handleHotKeyPressed()
         }
-        print("🔧 Updated show shortcut to: \(spec.display)")
+        AppLog("Updated show shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
     }
 
     /// Update only the One‑Click AI Action 1 shortcut
@@ -152,7 +152,7 @@ class HotKeyListener {
         oneClickAI1HotKey = makeHotKey(from: spec) { [weak self] in
             self?.handleOneClickAI1HotKeyPressed()
         }
-        print("🔧 Updated one-click action 1 shortcut to: \(spec.display)")
+        AppLog("Updated one-click action 1 shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
     }
     
     /// Update only the One‑Click AI Action 2 shortcut
@@ -162,7 +162,7 @@ class HotKeyListener {
         oneClickAI2HotKey = makeHotKey(from: spec) { [weak self] in
             self?.handleOneClickAI2HotKeyPressed()
         }
-        print("🔧 Updated one-click action 2 shortcut to: \(spec.display)")
+        AppLog("Updated one-click action 2 shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
     }
     
     /// Update only the One‑Click AI Action 3 shortcut
@@ -172,19 +172,19 @@ class HotKeyListener {
         oneClickAI3HotKey = makeHotKey(from: spec) { [weak self] in
             self?.handleOneClickAI3HotKeyPressed()
         }
-        print("🔧 Updated one-click action 3 shortcut to: \(spec.display)")
+        AppLog("Updated one-click action 3 shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
     }
 
     // MARK: - Helpers
     private func makeHotKey(from spec: ShortcutSpec, handler: @escaping () -> Void) -> HotKey? {
         // Translate ShortcutSpec (Carbon codes) into HotKey
         let combo = KeyCombo(carbonKeyCode: UInt32(spec.keyCode), carbonModifiers: UInt32(spec.modifiers))
-        print("🔧 Creating HotKey with keyCode: \(spec.keyCode), modifiers: \(spec.modifiers), display: \(spec.display)")
+        AppLog("Creating HotKey with keyCode: \(spec.keyCode), modifiers: \(spec.modifiers), display: \(spec.display)", level: .debug, category: "Hotkeys")
         
         let hk = HotKey(keyCombo: combo)
         hk.keyDownHandler = handler
         hk.isPaused = false
-        print("🔧 HotKey created successfully, isPaused: \(hk.isPaused)")
+        AppLog("HotKey created successfully, isPaused: \(hk.isPaused)", level: .debug, category: "Hotkeys")
         return hk
     }
     

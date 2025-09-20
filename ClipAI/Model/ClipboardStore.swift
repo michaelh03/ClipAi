@@ -41,12 +41,12 @@ class ClipboardStore: PasteboardMonitorDelegate {
                 self.storage = try SQLiteClipboardStorage()
             } catch {
                 // Fallback to JSON storage if SQLite fails to initialize
-                print("Warning: Failed to initialize SQLite storage, trying JSON storage: \(error)")
+                AppLog("Failed to initialize SQLite storage, trying JSON storage: \(error)", level: .warning, category: "Clipboard")
                 do {
                     self.storage = try JSONClipboardStorage()
                 } catch {
                     // Final fallback to in-memory storage
-                    print("Warning: Failed to initialize JSON storage, using in-memory storage: \(error)")
+                    AppLog("Failed to initialize JSON storage, using in-memory storage: \(error)", level: .warning, category: "Clipboard")
                     self.storage = InMemoryClipboardStorage()
                 }
             }
@@ -74,7 +74,7 @@ class ClipboardStore: PasteboardMonitorDelegate {
             items = Array(loadedItems.prefix(maxItems)) // Ensure we don't exceed maxItems
             delegate?.clipboardStore(self, didUpdateItems: items)
         } catch {
-            print("Error loading clipboard items: \(error)")
+            AppLog("Error loading clipboard items: \(error)", level: .error, category: "Clipboard")
             // Keep existing empty items array
         }
     }
@@ -86,7 +86,7 @@ class ClipboardStore: PasteboardMonitorDelegate {
         do {
             try await storage.saveItems(items)
         } catch {
-            print("Error saving clipboard items: \(error)")
+            AppLog("Error saving clipboard items: \(error)", level: .error, category: "Clipboard")
         }
     }
     
@@ -178,7 +178,7 @@ class ClipboardStore: PasteboardMonitorDelegate {
         do {
             try await storage.clearStorage()
         } catch {
-            print("Error clearing storage: \(error)")
+            AppLog("Error clearing storage: \(error)", level: .error, category: "Clipboard")
         }
     }
     

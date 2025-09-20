@@ -126,7 +126,7 @@ class PopupController: NSWindowController {
   /// Show the popup window centered on the main screen
   func showPopup() {
     guard let window = window else { return }
-    print("🪟 PopupController: showPopup called")
+    AppLog("PopupController: showPopup called", level: .info, category: "Popup")
 
     // let mouseLocation = NSEvent.mouseLocation
     // (Cursor position no longer needed when centering)
@@ -168,7 +168,7 @@ class PopupController: NSWindowController {
   }
   /// Hide the popup window
   func hidePopup() {
-    print("🪟 PopupController: hidePopup called")
+    AppLog("PopupController: hidePopup called", level: .info, category: "Popup")
     stopMonitoringForOutsideClicks()
     popupViewModel?.searchText = ""
     window?.orderOut(nil)
@@ -216,13 +216,13 @@ class PopupController: NSWindowController {
     let windowLocation = window.convertPoint(fromScreen: mouseLocation)
     let windowFrame = NSRect(origin: .zero, size: window.frame.size)
     
-    print("🖱️ Outside click detected - Mouse: \(mouseLocation), Window: \(windowLocation), Frame: \(windowFrame)")
+    AppLog("Outside click detected - Mouse: \(mouseLocation), Window: \(windowLocation), Frame: \(windowFrame)", level: .debug, category: "Popup")
 
     if !windowFrame.contains(windowLocation) {
-      print("🖱️ Click was outside window, hiding popup")
+      AppLog("Click was outside window, hiding popup", level: .info, category: "Popup")
       hidePopup()
     } else {
-      print("🖱️ Click was inside window, keeping popup visible")
+      AppLog("Click was inside window, keeping popup visible", level: .debug, category: "Popup")
     }
   }
 
