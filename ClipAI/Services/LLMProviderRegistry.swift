@@ -16,8 +16,8 @@ class LLMProviderRegistry {
     /// Singleton instance for app-wide access
     static let shared = LLMProviderRegistry()
     
-    /// Keychain service for API key management
-    private let keychainService: KeychainService
+    /// UserDefaults key for storing API keys per provider
+    private let apiKeysDefaultsKey: String = "apiKeys"
     
     /// Dictionary of registered providers by their ID
     private var providers: [String: LLMProvider] = [:]
@@ -32,14 +32,6 @@ class LLMProviderRegistry {
     
     /// Private initializer for singleton pattern
     private init() {
-        self.keychainService = KeychainService()
-        registerDefaultProviders()
-    }
-    
-    /// Initialize with custom keychain service (for testing)
-    /// - Parameter keychainService: Custom keychain service instance
-    init(keychainService: KeychainService) {
-        self.keychainService = keychainService
         registerDefaultProviders()
     }
     
@@ -205,13 +197,13 @@ class LLMProviderRegistry {
     
     /// Check if API key exists for a provider
     /// - Parameter providerId: The provider ID
-    /// - Returns: True if API key exists in keychain
+    /// - Returns: True if API key exists in UserDefaults
     private func hasAPIKey(for providerId: String) -> Bool {
-        do {
-            return try keychainService.hasAPIKey(for: providerId)
-        } catch {
-            return false
+        let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+        if let key = apiKeys[providerId]?.trimmingCharacters(in: .whitespacesAndNewlines), !key.isEmpty {
+            return true
         }
+        return false
     }
     
     /// Get or create a provider instance with API key from keychain
@@ -223,9 +215,10 @@ class LLMProviderRegistry {
             return existingProvider
         }
         
-        // Try to create new provider instance with API key
+        // Try to create new provider instance with API key from UserDefaults
         do {
-            guard let apiKey = try keychainService.retrieveAPIKey(for: id), !apiKey.isEmpty else {
+            let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+            guard let apiKey = apiKeys[id]?.trimmingCharacters(in: .whitespacesAndNewlines), !apiKey.isEmpty else {
                 return nil
             }
             let provider = try createProvider(id: id, apiKey: apiKey)

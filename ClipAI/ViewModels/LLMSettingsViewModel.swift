@@ -83,6 +83,8 @@ class LLMSettingsViewModel: ObservableObject {
     
     private let keychainService: KeychainService
     private let providerRegistry: LLMProviderRegistry
+    /// UserDefaults key used to store API keys per provider
+    private let apiKeysDefaultsKey: String = "apiKeys"
     // Defer PromptStore creation until first use to avoid blocking first appearance
     private var injectedPromptStore: PromptStore? = nil
     private var promptStore: PromptStore { injectedPromptStore ?? PromptStore.shared }
@@ -158,20 +160,15 @@ class LLMSettingsViewModel: ObservableObject {
     
     /// Load API key for the currently selected provider
     func loadAPIKeyForSelectedProvider() {
-        do {
-            if let existingKey = try keychainService.retrieveAPIKey(for: selectedProvider.id) {
-                apiKeyInput = existingKey
-                apiKeyIsValid = true
-                validationError = nil
-            } else {
-                apiKeyInput = ""
-                apiKeyIsValid = false
-                validationError = nil
-            }
-        } catch {
+        let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+        if let existingKey = apiKeys[selectedProvider.id], !existingKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            apiKeyInput = existingKey
+            apiKeyIsValid = true
+            validationError = nil
+        } else {
             apiKeyInput = ""
             apiKeyIsValid = false
-            validationError = "Failed to load existing API key"
+            validationError = nil
         }
         
         // Clear any previous messages
@@ -244,59 +241,47 @@ class LLMSettingsViewModel: ObservableObject {
             return
         }
         
-        do {
-            try keychainService.storeAPIKey(apiKeyInput, for: selectedProvider.id)
-            saveSuccess = true
-            errorMessage = nil
-            
-            // Update provider key status
-            loadProviderKeyStatus()
-            
-            // Refresh provider registry and update availability status
-            providerRegistry.refreshProviderAvailability()
-            Task {
-                await loadDefaultProvider()
-                await loadProviderAvailabilityStatus()
-            }
-            
-            // Clear success message after a delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.saveSuccess = false
-            }
-            
-        } catch let error as LLMError {
-            saveSuccess = false
-            errorMessage = error.errorDescription
-        } catch {
-            saveSuccess = false
-            errorMessage = "Failed to save API key"
+        var apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+        apiKeys[selectedProvider.id] = apiKeyInput
+        UserDefaults.standard.set(apiKeys, forKey: apiKeysDefaultsKey)
+        saveSuccess = true
+        errorMessage = nil
+        
+        // Update provider key status
+        loadProviderKeyStatus()
+        
+        // Refresh provider registry and update availability status
+        providerRegistry.refreshProviderAvailability()
+        Task {
+            await loadDefaultProvider()
+            await loadProviderAvailabilityStatus()
+        }
+        
+        // Clear success message after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.saveSuccess = false
         }
     }
     
     /// Remove the API key for the current provider
     func removeAPIKey() {
-        do {
-            try keychainService.removeAPIKey(for: selectedProvider.id)
-            apiKeyInput = ""
-            apiKeyIsValid = false
-            validationError = nil
-            saveSuccess = false
-            errorMessage = nil
-            
-            // Update provider key status
-            loadProviderKeyStatus()
-            
-            // Refresh provider registry and update availability status
-            providerRegistry.refreshProviderAvailability()
-            Task {
-                await loadDefaultProvider()
-                await loadProviderAvailabilityStatus()
-            }
-            
-        } catch let error as LLMError {
-            errorMessage = error.errorDescription
-        } catch {
-            errorMessage = "Failed to remove API key"
+        var apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+        apiKeys.removeValue(forKey: selectedProvider.id)
+        UserDefaults.standard.set(apiKeys, forKey: apiKeysDefaultsKey)
+        apiKeyInput = ""
+        apiKeyIsValid = false
+        validationError = nil
+        saveSuccess = false
+        errorMessage = nil
+        
+        // Update provider key status
+        loadProviderKeyStatus()
+        
+        // Refresh provider registry and update availability status
+        providerRegistry.refreshProviderAvailability()
+        Task {
+            await loadDefaultProvider()
+            await loadProviderAvailabilityStatus()
         }
     }
     
@@ -559,9 +544,10 @@ class LLMSettingsViewModel: ObservableObject {
         providerKeyStatus.removeAll()
         
         for provider in availableProviders {
-            do {
-                providerKeyStatus[provider.id] = try keychainService.hasAPIKey(for: provider.id)
-            } catch {
+            let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
+            if let key = apiKeys[provider.id]?.trimmingCharacters(in: .whitespacesAndNewlines), !key.isEmpty {
+                providerKeyStatus[provider.id] = true
+            } else {
                 providerKeyStatus[provider.id] = false
             }
         }
