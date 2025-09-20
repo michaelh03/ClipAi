@@ -91,6 +91,8 @@ class MacPawOpenAIProvider: LLMProvider {
         guard !prompt.isEmpty else {
             throw LLMError.invalidResponse(provider: id, details: "Empty prompt provided")
         }
+      
+      
         
         // Determine model to use
         let selectedModel = resolveModel(from: model)
@@ -113,14 +115,21 @@ class MacPawOpenAIProvider: LLMProvider {
         // Add user prompt
         messages.append(.user(.init(content: .string(prompt))))
         
+        // Determine sampling parameter support per model
+        let samplingSupported = supportsCustomSampling(model: selectedModel)
+        let frequencyPenalty: Double? = samplingSupported ? 0.0 : nil
+        let presencePenalty: Double? = samplingSupported ? 0.0 : nil
+        let temperature: Double? = samplingSupported ? 0.7 : nil
+        let topP: Double? = samplingSupported ? 1.0 : nil
+        
         // Create chat query
         let query = ChatQuery(
             messages: messages,
             model: selectedModel,
-            frequencyPenalty: 0.0,
-            presencePenalty: 0.0,
-            temperature: 0.7, // Balanced creativity vs consistency
-            topP: 1.0
+            frequencyPenalty: frequencyPenalty,
+            presencePenalty: presencePenalty,
+            temperature: temperature,
+            topP: topP
         )
         
         do {
@@ -177,6 +186,16 @@ class MacPawOpenAIProvider: LLMProvider {
     
     // MARK: - Private Helper Methods
     
+    /// Returns whether the specified model supports custom sampling params (temperature/topP/penalties)
+    /// Some lightweight models (e.g., "nano") only allow default sampling and will error on overrides
+    private func supportsCustomSampling(model: Model) -> Bool {
+        let normalized = model.lowercased()
+        if normalized.contains("gpt-5") {
+            return false
+        }
+        return true
+    }
+    
     /// Resolves the model to use based on the provided string
     /// - Parameter modelString: Optional model identifier string
     /// - Returns: Model enum value to use
@@ -222,7 +241,6 @@ class MacPawOpenAIProvider: LLMProvider {
             AppLogger.shared.warn("OpenAIError mapped to LLMError provider=\(id) description=\(mapped.errorDescription ?? "")", category: "LLM")
             return mapped
         }
-      
         
         // Handle HTTP response errors if available
         if let nsError = error as NSError? {
@@ -233,12 +251,16 @@ class MacPawOpenAIProvider: LLMProvider {
                 return mapped
             }
         }
+      
+      
         
         // Default to unknown error
         let mapped = LLMError.unknown(provider: id, underlyingError: error)
         AppLogger.shared.warn("Unknown error mapped to LLMError provider=\(id) description=\(mapped.errorDescription ?? "")", category: "LLM")
         return mapped
     }
+  
+  
     
     /// Maps specific OpenAI SDK errors to LLMError cases
     /// - Parameter error: OpenAI SDK error
