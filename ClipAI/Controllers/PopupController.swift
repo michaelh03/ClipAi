@@ -92,25 +92,25 @@ class PopupController: NSWindowController {
       self.hidePastePopup()
       
       // Delay to allow popup to fully hide
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-        if let app = previousApp {
-          // Use proper activation options to ensure focus
-          _ = app.activate(options: [.activateIgnoringOtherApps])
-          
-          // Additional delay to ensure the app is ready to receive input
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            Self.sendPasteKeystroke()
-            // Clear the reference after paste operation is complete
-            self.previouslyFrontmostApp = nil
-          }
-        } else {
-          AppLog("PopupController: No previous app to restore focus to", level: .warning, category: "Popup")
-          // Still try to send the keystroke to current frontmost app
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            Self.sendPasteKeystroke()
-          }
-        }
-      }
+//      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//        if let app = previousApp {
+//          // Use proper activation options to ensure focus
+//          _ = app.activate(options: [.activateIgnoringOtherApps])
+//          
+//          // Additional delay to ensure the app is ready to receive input
+//          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//            Self.sendPasteKeystroke()
+//            // Clear the reference after paste operation is complete
+//            self.previouslyFrontmostApp = nil
+//          }
+//        } else {
+//          AppLog("PopupController: No previous app to restore focus to", level: .warning, category: "Popup")
+//          // Still try to send the keystroke to current frontmost app
+//          DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+//            Self.sendPasteKeystroke()
+//          }
+//        }
+//      }
     }
     
     
