@@ -54,7 +54,7 @@ class PasteboardMonitor: ObservableObject {
         // Create timer that fires on the main queue
         monitorTimer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                AppLog("PasteboardMonitor: Timer tick", level: .debug, category: "Clipboard")
+//                AppLog("PasteboardMonitor: Timer tick", level: .debug, category: "Clipboard")
                 self?.checkForPasteboardChanges()
             }
         }
@@ -76,11 +76,11 @@ class PasteboardMonitor: ObservableObject {
     /// Manually check for pasteboard changes (useful for testing)
     func checkForPasteboardChanges() {
         let currentChangeCount = NSPasteboard.general.changeCount
-        AppLog("PasteboardMonitor: Checking pasteboard (current=\(currentChangeCount), last=\(lastChangeCount))", level: .debug, category: "Clipboard")
+//        AppLog("PasteboardMonitor: Checking pasteboard (current=\(currentChangeCount), last=\(lastChangeCount))", level: .debug, category: "Clipboard")
         
         // Check if the pasteboard has changed
         guard currentChangeCount != lastChangeCount else {
-            AppLog("PasteboardMonitor: No change detected", level: .debug, category: "Clipboard")
+//            AppLog("PasteboardMonitor: No change detected", level: .debug, category: "Clipboard")
             return
         }
         
