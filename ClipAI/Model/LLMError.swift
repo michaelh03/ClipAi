@@ -179,6 +179,7 @@ enum LLMError: Error, LocalizedError, Equatable {
 extension LLMError {
     /// Maps common HTTP status codes to LLMError cases
     static func fromHTTPStatus(_ statusCode: Int, provider: String, data: Data? = nil) -> LLMError {
+        AppLogger.shared.debug("Map HTTP status to LLMError provider=\(provider) status=\(statusCode)", category: "LLM")
         switch statusCode {
         case 401:
             return .invalidKey(provider: provider)
@@ -210,6 +211,7 @@ extension LLMError {
     
     /// Maps URLError to LLMError
     static func fromURLError(_ error: URLError, provider: String = "Network") -> LLMError {
+        AppLogger.shared.debug("Map URLError to LLMError provider=\(provider) code=\(error.code.rawValue)", category: "LLM")
         return .network(underlyingError: error)
     }
 }

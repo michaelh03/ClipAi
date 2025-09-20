@@ -121,6 +121,7 @@ class LLMSettingsViewModel: ObservableObject {
     // MARK: - Initialization
     
     init(keychainService: KeychainService = KeychainService(), providerRegistry: LLMProviderRegistry = LLMProviderRegistry.shared, promptStore: PromptStore? = nil, generalSettingsViewModel: GeneralSettingsViewModel) {
+        AppLog("Initializing LLMSettingsViewModel", level: .info, category: "Settings")
         self.keychainService = keychainService
         self.providerRegistry = providerRegistry
         self.generalSettingsViewModel = generalSettingsViewModel
@@ -487,37 +488,37 @@ class LLMSettingsViewModel: ObservableObject {
     
     /// Load default system prompt IDs from UserDefaults
     func loadDefaultSystemPromptIds() {
-        print("🔧 Loading default system prompt IDs from UserDefaults")
+        AppLog("Loading default system prompt IDs from UserDefaults", level: .debug, category: "Prompts")
         // Load individual action prompts
         for action in 1...3 {
             let key = "userSelectedPrompt\(action)"
             if let storedId = UserDefaults.standard.string(forKey: key) {
                 defaultSystemPromptIds[action - 1] = storedId
-                print("🔧 Loaded \(key): \(storedId)")
+                AppLog("Loaded \(key): \(storedId)", level: .debug, category: "Prompts")
             } else {
                 defaultSystemPromptIds[action - 1] = nil
-                print("🔧 No stored value for \(key)")
+                AppLog("No stored value for \(key)", level: .debug, category: "Prompts")
             }
         }
-        print("🔧 Final loaded defaultSystemPromptIds: \(defaultSystemPromptIds)")
+        AppLog("Final loaded defaultSystemPromptIds: \(defaultSystemPromptIds)", level: .debug, category: "Prompts")
     }
     
     /// Save default system prompt IDs to UserDefaults
     func saveDefaultSystemPromptIds() {
-        print("🔧 Saving default system prompt IDs: \(defaultSystemPromptIds)")
+        AppLog("Saving default system prompt IDs: \(defaultSystemPromptIds)", level: .debug, category: "Prompts")
         for action in 1...3 {
             let key = "userSelectedPrompt\(action)"
             if let id = defaultSystemPromptIds[action - 1] {
                 UserDefaults.standard.set(id, forKey: key)
-                print("🔧 Saved \(key): \(id)")
+                AppLog("Saved \(key): \(id)", level: .debug, category: "Prompts")
             } else {
                 UserDefaults.standard.removeObject(forKey: key)
-                print("🔧 Removed \(key)")
+                AppLog("Removed \(key)", level: .debug, category: "Prompts")
             }
         }
         // Force synchronization to disk
         UserDefaults.standard.synchronize()
-        print("🔧 UserDefaults synchronized")
+        AppLog("UserDefaults synchronized", level: .debug, category: "Prompts")
     }
     
     /// Get the default system prompt object for a specific action
@@ -542,12 +543,14 @@ class LLMSettingsViewModel: ObservableObject {
     func setDefaultSystemPrompt(_ promptId: UUID?, for action: Int) {
         guard action >= 1 && action <= 3 else { return }
         let promptIdString = promptId?.uuidString
-        print("🔧 Setting default system prompt for action \(action): \(promptIdString ?? "nil")")
+        AppLog("Setting default system prompt for action \(action): \(promptIdString ?? "nil")", level: .info, category: "Prompts")
         defaultSystemPromptIds[action - 1] = promptIdString
-        print("🔧 Updated defaultSystemPromptIds: \(defaultSystemPromptIds)")
+        AppLog("Updated defaultSystemPromptIds: \(defaultSystemPromptIds)", level: .debug, category: "Prompts")
         // Explicitly call save since didSet might not trigger for array element changes
         saveDefaultSystemPromptIds()
     }
+
+    
     
     // MARK: - Private Methods
     

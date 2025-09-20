@@ -106,7 +106,7 @@ struct PopupView: View {
     )
     .clipShape(RoundedRectangle(cornerRadius: 12))
     .onAppear {
-      print("🎭 PopupView onAppear - showContent: \(showContent), shouldFadeOut: \(shouldFadeOut)")
+      AppLog("PopupView onAppear - showContent: \(showContent), shouldFadeOut: \(shouldFadeOut)", level: .debug, category: "Popup")
       
       // Reset states when popup appears
       shouldFadeOut = false
@@ -130,7 +130,7 @@ struct PopupView: View {
       }
     }
     .onDisappear {
-      print("🎭 PopupView onDisappear - resetting states")
+      AppLog("PopupView onDisappear - resetting states", level: .debug, category: "Popup")
       // Reset states when popup disappears
       showContent = false
       shouldFadeOut = false
@@ -144,14 +144,14 @@ struct PopupView: View {
         
         // Call completion handler after animation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-          print("🎬 PopupView: Fade out complete, calling hidePopup")
+          AppLog("PopupView: Fade out complete, calling hidePopup", level: .debug, category: "Popup")
           onFadeOutComplete?()
         }
       }
     }
     .onReceive(viewModel.$shouldFocusSearchField) { shouldFocus in
       if shouldFocus {
-        print("🎯 PopupView: Received focus trigger, setting searchFieldFocus = true")
+        AppLog("PopupView: Received focus trigger, setting searchFieldFocus = true", level: .debug, category: "Popup")
         searchFieldFocus = true
         isListFocused = false // Remove focus from list
         // Reset the viewModel flag
@@ -160,7 +160,7 @@ struct PopupView: View {
     }
     .onReceive(viewModel.$shouldFocusList) { shouldFocus in
       if shouldFocus {
-        print("🎯 PopupView: Received list focus trigger, setting isListFocused = true")
+        AppLog("PopupView: Received list focus trigger, setting isListFocused = true", level: .debug, category: "Popup")
         isListFocused = true
         searchFieldFocus = false // Remove focus from search field
         // Reset the viewModel flag
@@ -168,7 +168,7 @@ struct PopupView: View {
       }
     }
     .onReceive(viewModel.$shouldTriggerFadeOut) { shouldFade in
-      print("🎬 PopupView: Received fade out trigger: \(shouldFade)")
+      AppLog("PopupView: Received fade out trigger: \(shouldFade)", level: .debug, category: "Popup")
       if shouldFade {
         shouldFadeOut = true
         // Reset the viewModel flag

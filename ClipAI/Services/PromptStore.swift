@@ -105,7 +105,7 @@ class PromptStore: ObservableObject {
         }
         
         if !isInitialLoadComplete {
-            print("⚠️ PromptStore initial load timed out after \(timeout) seconds")
+            AppLog("PromptStore initial load timed out after \(timeout) seconds", level: .warning, category: "Prompts")
         }
     }
     
@@ -216,9 +216,9 @@ class PromptStore: ObservableObject {
                 systemPrompts = systemPromptsFromDB
             }
             
-            print("✅ Loaded \(systemPrompts.count) system prompts from database")
+            AppLog("Loaded \(systemPrompts.count) system prompts from database", level: .info, category: "Prompts")
         } catch {
-            print("⚠️ Failed to load system prompts from database: \(error)")
+            AppLog("Failed to load system prompts from database: \(error)", level: .warning, category: "Prompts")
             // Fallback to in-memory defaults
             systemPrompts = SystemPrompt.defaultPrompts
         }
@@ -254,14 +254,14 @@ class PromptStore: ObservableObject {
     private func seedSystemPromptsToDatabase() async {
         // Use hardcoded defaults from SystemPrompt.swift
         let promptsToSeed = SystemPrompt.defaultPrompts
-        print("✅ Using \(promptsToSeed.count) hardcoded default prompts for seeding")
+        AppLog("Using \(promptsToSeed.count) hardcoded default prompts for seeding", level: .info, category: "Prompts")
         
         // Insert system prompts into database using batch operation
         do {
             try await batchInsertPromptsToDatabase(promptsToSeed)
-            print("✅ Seeded \(promptsToSeed.count) system prompts to database")
+            AppLog("Seeded \(promptsToSeed.count) system prompts to database", level: .info, category: "Prompts")
         } catch {
-            print("❌ Failed to seed system prompts to database: \(error)")
+            AppLog("Failed to seed system prompts to database: \(error)", level: .error, category: "Prompts")
         }
     }
     
@@ -293,14 +293,14 @@ class PromptStore: ObservableObject {
                 for prompt in jsonPrompts {
                     try await insertPromptToDatabase(prompt)
                 }
-                print("✅ Migrated \(jsonPrompts.count) prompts from JSON to SQLite")
+                AppLog("Migrated \(jsonPrompts.count) prompts from JSON to SQLite", level: .info, category: "Prompts")
                 
                 // Optionally remove JSON file after successful migration
                 try FileManager.default.removeItem(at: jsonURL)
-                print("✅ Removed old JSON file after migration")
+                AppLog("Removed old JSON file after migration", level: .info, category: "Prompts")
             }
         } catch {
-            print("⚠️ Failed to migrate prompts from JSON: \(error)")
+            AppLog("Failed to migrate prompts from JSON: \(error)", level: .warning, category: "Prompts")
         }
     }
     
@@ -308,9 +308,9 @@ class PromptStore: ObservableObject {
     private func loadUserPrompts() async {
         do {
             userPrompts = try await loadUserPromptsFromDatabase()
-            print("✅ Loaded \(userPrompts.count) user prompts from database")
+            AppLog("Loaded \(userPrompts.count) user prompts from database", level: .info, category: "Prompts")
         } catch {
-            print("⚠️ Failed to load user prompts from database: \(error)")
+            AppLog("Failed to load user prompts from database: \(error)", level: .warning, category: "Prompts")
             userPrompts = []
         }
     }

@@ -13,7 +13,12 @@ struct LLMSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     
     init(generalSettingsViewModel: GeneralSettingsViewModel) {
-        self._viewModel = StateObject(wrappedValue: LLMSettingsViewModel(generalSettingsViewModel: generalSettingsViewModel))
+        self._viewModel = StateObject(wrappedValue: LLMSettingsViewModel(
+            keychainService: KeychainService(),
+            providerRegistry: LLMProviderRegistry.shared,
+            promptStore: nil,
+            generalSettingsViewModel: generalSettingsViewModel
+        ))
     }
     
     var body: some View {
@@ -39,6 +44,11 @@ struct LLMSettingsView: View {
                         title: "Prompts", 
                         icon: "text.bubble",
                         view: { AnyView(systemPromptsTab) }
+                    ),
+                    (
+                        title: "Logs",
+                        icon: "doc.text.magnifyingglass",
+                        view: { AnyView(logsTab) }
                     )
                 ]
             )
@@ -80,6 +90,10 @@ struct LLMSettingsView: View {
 
     private var generalTab: some View {
         GeneralSettingsView(viewModel: viewModel.generalSettingsViewModel)
+    }
+
+    private var logsTab: some View {
+        LogsView()
     }
     
     // MARK: - View Components

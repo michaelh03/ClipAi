@@ -40,11 +40,16 @@ extension LLMProvider {
     
     /// Convenience method for sending prompts without system prompt or model specification
     func send(prompt: String) async throws -> String {
+        AppLogger.shared.debug("LLM send (convenience) invoked provider=\(self.id) promptChars=\(prompt.count)", category: "LLM")
         return try await send(prompt: prompt, systemPrompt: nil, model: nil)
     }
     
     /// Convenience method for sending prompts with system prompt but default model
     func send(prompt: String, systemPrompt: String) async throws -> String {
+        AppLogger.shared.debug(
+            "LLM send (convenience) invoked provider=\(self.id) systemPromptChars=\(systemPrompt.count) promptChars=\(prompt.count)",
+            category: "LLM"
+        )
         return try await send(prompt: prompt, systemPrompt: systemPrompt, model: nil)
     }
 }

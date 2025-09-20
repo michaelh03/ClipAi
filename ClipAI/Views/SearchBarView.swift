@@ -36,10 +36,10 @@ struct SearchBarView: NSViewRepresentable {
         }
         // Focus management
         if focus, nsView.window != nil, nsView.window?.firstResponder != nsView {
-            print("🎯 SearchField requesting focus...")
+            AppLog("SearchField requesting focus...", level: .debug, category: "Popup")
             DispatchQueue.main.async {
                 let didBecome = nsView.becomeFirstResponder()
-                print("🎯 SearchField became first responder: \(didBecome)")
+                AppLog("SearchField became first responder: \(didBecome)", level: .debug, category: "Popup")
                 // Reset the toggle so future updates don't steal focus
                 focus = false
             }
@@ -53,7 +53,7 @@ struct SearchBarView: NSViewRepresentable {
 
         func controlTextDidChange(_ obj: Notification) {
             guard let field = obj.object as? NSSearchField else { return }
-            print("🔤 SearchBar text changed: '\(field.stringValue)'")
+            AppLog("SearchBar text changed: '\(field.stringValue)'", level: .debug, category: "Popup")
             parent.text = field.stringValue
         }
 
@@ -68,7 +68,7 @@ struct SearchBarView: NSViewRepresentable {
             } else if commandSelector == #selector(NSResponder.moveUp(_:)) ||
                       commandSelector == #selector(NSResponder.moveDown(_:)) {
                 // Handle arrow keys - transfer focus back to list
-                print("🔄 SearchBar: Arrow key pressed, transferring focus to list")
+                AppLog("SearchBar: Arrow key pressed, transferring focus to list", level: .debug, category: "Popup")
                 parent.onArrowKey?()
                 return true // handled – don't propagate
             }

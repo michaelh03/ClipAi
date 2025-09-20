@@ -86,7 +86,7 @@ class MacPawOpenAIProvider: LLMProvider {
         systemPrompt: String? = nil,
         model: String? = nil
     ) async throws -> String {
-        
+        let startTime = Date()
         // Validate inputs
         guard !prompt.isEmpty else {
             throw LLMError.invalidResponse(provider: id, details: "Empty prompt provided")
@@ -94,6 +94,13 @@ class MacPawOpenAIProvider: LLMProvider {
         
         // Determine model to use
         let selectedModel = resolveModel(from: model)
+        let systemChars = systemPrompt?.count ?? 0
+        AppLogger.shared.info("LLM request started provider=\(id) model=\(selectedModel)", category: "LLM")
+        AppLogger.shared.debug("LLM request input lengths provider=\(id) model=\(selectedModel) systemPromptChars=\(systemChars) promptChars=\(prompt.count)", category: "LLM")
+        if let systemPrompt = systemPrompt, !systemPrompt.isEmpty {
+            AppLogger.shared.debug("SystemPrompt: \(summarizeForLog(systemPrompt))", category: "LLM")
+        }
+        AppLogger.shared.debug("Prompt: \(summarizeForLog(prompt))", category: "LLM")
         
         // Build messages array
         var messages: [ChatQuery.ChatCompletionMessageParam] = []
@@ -129,11 +136,19 @@ class MacPawOpenAIProvider: LLMProvider {
                 )
             }
             
+            let elapsedMs = Int(Date().timeIntervalSince(startTime) * 1000)
+            AppLogger.shared.info("LLM request success provider=\(id) model=\(selectedModel) durationMs=\(elapsedMs) responseChars=\(content.count)", category: "LLM")
+            AppLogger.shared.debug("Response preview: \(summarizeForLog(content))", category: "LLM")
             return content
             
         } catch {
             // Map OpenAI errors to LLMError
-            throw mapError(error)
+            let mapped = mapError(error)
+            let elapsedMs = Int(Date().timeIntervalSince(startTime) * 1000)
+            let desc = mapped.errorDescription ?? String(describing: mapped)
+            let retryable = mapped.isRetryable ? "true" : "false"
+            AppLogger.shared.error("LLM request failed provider=\(id) model=\(selectedModel) durationMs=\(elapsedMs) retryable=\(retryable) error=\(desc)", category: "LLM")
+            throw mapped
         }
     }
     
@@ -185,24 +200,33 @@ class MacPawOpenAIProvider: LLMProvider {
     private func mapError(_ error: Error) -> LLMError {
         // Handle URLErrors (network issues)
         if let urlError = error as? URLError {
-            return LLMError.fromURLError(urlError, provider: id)
+            let mapped = LLMError.fromURLError(urlError, provider: id)
+            AppLogger.shared.warn("URLError mapped to LLMError provider=\(id) code=\(urlError.code.rawValue) description=\(mapped.errorDescription ?? "")", category: "LLM")
+            return mapped
         }
         
         // Handle OpenAI-specific errors
         if let openAIError = error as? OpenAIError {
-            return mapOpenAIError(openAIError)
+            let mapped = mapOpenAIError(openAIError)
+            AppLogger.shared.warn("OpenAIError mapped to LLMError provider=\(id) description=\(mapped.errorDescription ?? "")", category: "LLM")
+            return mapped
         }
+      
         
         // Handle HTTP response errors if available
         if let nsError = error as NSError? {
             let statusCode = nsError.code
             if statusCode >= 400 && statusCode < 600 {
-                return LLMError.fromHTTPStatus(statusCode, provider: id, data: nil)
+                let mapped = LLMError.fromHTTPStatus(statusCode, provider: id, data: nil)
+                AppLogger.shared.warn("HTTP status error mapped to LLMError provider=\(id) status=\(statusCode) description=\(mapped.errorDescription ?? "")", category: "LLM")
+                return mapped
             }
         }
         
         // Default to unknown error
-        return LLMError.unknown(provider: id, underlyingError: error)
+        let mapped = LLMError.unknown(provider: id, underlyingError: error)
+        AppLogger.shared.warn("Unknown error mapped to LLMError provider=\(id) description=\(mapped.errorDescription ?? "")", category: "LLM")
+        return mapped
     }
     
     /// Maps specific OpenAI SDK errors to LLMError cases
@@ -269,5 +293,17 @@ extension MacPawOpenAIProvider {
         default:
             return 4096 // Safe default
         }
+    }
+}
+
+// MARK: - Logging Helpers
+
+private extension MacPawOpenAIProvider {
+    func summarizeForLog(_ text: String, limit: Int = 400) -> String {
+        let singleLine = text.replacingOccurrences(of: "\n", with: "\\n")
+        if singleLine.count <= limit { return singleLine }
+        let idx = singleLine.index(singleLine.startIndex, offsetBy: limit)
+        let prefix = String(singleLine[..<idx])
+        return prefix + "…(+\(singleLine.count - limit) chars)"
     }
 }
