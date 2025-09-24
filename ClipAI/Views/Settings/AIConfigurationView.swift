@@ -14,11 +14,6 @@ struct AIConfigurationView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header section with current default provider
-                defaultProviderHeaderView
-                
-                Divider()
-                
                 // Provider configuration section
                 VStack(spacing: 20) {
                     providerConfigurationHeaderView
@@ -55,120 +50,55 @@ struct AIConfigurationView: View {
     }
     
     // MARK: - View Components
-    
-    private var defaultProviderHeaderView: some View {
+
+    private var providerConfigurationHeaderView: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: "star.circle.fill")
-                    .foregroundColor(.orange)
+                Image(systemName: "brain")
+                    .foregroundColor(.accentColor)
                     .font(.title2)
-                Text("Active AI Provider")
+                Text("AI Provider Setup")
                     .font(.title2)
                     .fontWeight(.semibold)
                 Spacer()
             }
-            
-            HStack(spacing: 16) {
-                // Status indicator and text
-                HStack(spacing: 8) {
-                    if let defaultId = viewModel.defaultProviderId,
-                       let defaultProvider = viewModel.availableProviders.first(where: { $0.id == defaultId }) {
-                        // Status indicator
-                        if viewModel.providerAvailabilityStatus[defaultProvider.id] == true {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                                .font(.title3)
-                        } else if viewModel.providerKeyStatus[defaultProvider.id] == true {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundColor(.orange)
-                                .font(.title3)
-                        } else {
-                            Image(systemName: "xmark.circle")
-                                .foregroundColor(.red)
-                                .font(.title3)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            // Status text
-                            if viewModel.providerAvailabilityStatus[defaultProvider.id] == true {
-                                Text("Ready")
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                                    .fontWeight(.medium)
-                            } else if viewModel.providerKeyStatus[defaultProvider.id] == true {
-                                Text("Needs verification")
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-                                    .fontWeight(.medium)
-                            } else {
-                                Text("Not configured")
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                    .fontWeight(.medium)
-                            }
-                        }
+
+            // Show current active provider status
+            HStack(spacing: 8) {
+                if let defaultId = viewModel.defaultProviderId,
+                   let defaultProvider = viewModel.availableProviders.first(where: { $0.id == defaultId }) {
+                    // Status indicator for active provider
+                    if viewModel.providerAvailabilityStatus[defaultProvider.id] == true {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.subheadline)
+                    } else if viewModel.providerKeyStatus[defaultProvider.id] == true {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundColor(.orange)
+                            .font(.subheadline)
                     } else {
-                        Image(systemName: "exclamationmark.circle")
-                            .foregroundColor(.secondary)
-                            .font(.title3)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("No provider selected")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .fontWeight(.medium)
-                        }
+                        Image(systemName: "xmark.circle")
+                            .foregroundColor(.red)
+                            .font(.subheadline)
                     }
+
+                    Text("Active Provider: \(defaultProvider.displayName)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .fontWeight(.medium)
+                } else {
+                    Image(systemName: "exclamationmark.circle")
+                        .foregroundColor(.secondary)
+                        .font(.subheadline)
+
+                    Text("No active provider - configure one below")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .fontWeight(.medium)
                 }
-                
+
                 Spacer()
-                
-                // Provider dropdown
-                Picker("Active Provider", selection: Binding<String?>(
-                    get: { viewModel.defaultProviderId },
-                    set: { newValue in
-                        viewModel.defaultProviderId = newValue
-                        LLMProviderRegistry.shared.setDefaultProviderId(newValue)
-                    }
-                )) {
-                    Text("None").tag(nil as String?)
-                    ForEach(viewModel.availableProviders) { provider in
-                        HStack {
-                            Text(provider.displayName)
-                            Spacer()
-                            // Status indicators in dropdown
-                            if viewModel.providerAvailabilityStatus[provider.id] == true {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            } else if viewModel.providerKeyStatus[provider.id] == true {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.orange)
-                            } else {
-                                Image(systemName: "circle")
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .tag(provider.id as String?)
-                    }
-                }
-                .pickerStyle(.menu)
-                .frame(minWidth: 200)
             }
-        }
-        .padding(16)
-        .background(Color(NSColor.separatorColor).opacity(0.1))
-        .cornerRadius(12)
-    }
-    
-    private var providerConfigurationHeaderView: some View {
-        HStack {
-            Image(systemName: "gearshape.fill")
-                .foregroundColor(.accentColor)
-                .font(.title2)
-            Text("Configure AI Provider")
-                .font(.title2)
-                .fontWeight(.semibold)
-            Spacer()
         }
     }
     
@@ -190,22 +120,67 @@ struct AIConfigurationView: View {
             
             Picker("Provider", selection: $viewModel.selectedProvider) {
                 ForEach(viewModel.availableProviders) { provider in
-                    HStack {
-                        Text(provider.displayName)
-                        Spacer()
-                        // Status indicators
-                        if viewModel.providerAvailabilityStatus[provider.id] == true {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                                .help("Available and configured")
-                        } else if viewModel.providerKeyStatus[provider.id] == true {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundColor(.orange)
-                                .help("API key present but not verified")
-                        } else {
-                            Image(systemName: "circle")
-                                .foregroundColor(.secondary)
-                                .help("Not configured")
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(provider.displayName)
+                                .fontWeight(.medium)
+                            Spacer()
+
+                            // Active indicator
+                            if viewModel.defaultProviderId == provider.id {
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.orange)
+                                    .font(.caption)
+                                    .help("Currently active provider")
+                            }
+
+                            // Status indicators
+                            if viewModel.providerAvailabilityStatus[provider.id] == true {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption)
+                                    .help("Configured and working")
+                            } else if viewModel.providerKeyStatus[provider.id] == true {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.orange)
+                                    .font(.caption)
+                                    .help("API key saved but not verified")
+                            } else {
+                                Image(systemName: "circle")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                                    .help("Not configured")
+                            }
+                        }
+
+                        // Status text
+                        HStack {
+                            if viewModel.defaultProviderId == provider.id {
+                                Text("ACTIVE")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.orange)
+                                Text("•")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            if viewModel.providerAvailabilityStatus[provider.id] == true {
+                                Text("Ready")
+                                    .font(.caption2)
+                                    .foregroundColor(.green)
+                                    .fontWeight(.medium)
+                            } else if viewModel.providerKeyStatus[provider.id] == true {
+                                Text("Needs verification")
+                                    .font(.caption2)
+                                    .foregroundColor(.orange)
+                                    .fontWeight(.medium)
+                            } else {
+                                Text("Not configured")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .fontWeight(.medium)
+                            }
                         }
                     }
                     .tag(provider)
@@ -491,7 +466,7 @@ struct AIConfigurationView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.green)
-                        Text("Your API key has been securely stored and is ready to use.")
+                        Text("Your API key has been saved and this provider is now active.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

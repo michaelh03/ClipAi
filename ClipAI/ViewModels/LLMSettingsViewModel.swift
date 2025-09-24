@@ -234,23 +234,27 @@ class LLMSettingsViewModel: ObservableObject {
             errorMessage = "Please enter an API key"
             return
         }
-        
+
         var apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
         apiKeys[selectedProvider.id] = apiKeyInput
         UserDefaults.standard.set(apiKeys, forKey: apiKeysDefaultsKey)
         saveSuccess = true
         errorMessage = nil
-        
+
+        // Automatically set this provider as the default when saving API key
+        defaultProviderId = selectedProvider.id
+        LLMProviderRegistry.shared.setDefaultProviderId(selectedProvider.id)
+
         // Update provider key status
         loadProviderKeyStatus()
-        
+
         // Refresh provider registry and update availability status
         providerRegistry.refreshProviderAvailability()
         Task {
             await loadDefaultProvider()
             await loadProviderAvailabilityStatus()
         }
-        
+
         // Clear success message after a delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             self.saveSuccess = false
