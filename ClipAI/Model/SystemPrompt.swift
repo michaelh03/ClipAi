@@ -136,8 +136,8 @@ extension SystemPrompt {
     static let defaultPrompts: [SystemPrompt] = [
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-            title: "Tech Rewrite",
-            template: "<task>\nRewrite the text for concise, friendly professional communication suitable for Slack, JIRA, or other technical tools.\n</task>\n\n<guidelines>\n- Correct all spelling and grammar\n- Preserve key meaning and details; remove filler\n- Use a friendly, cooperative tone; not overly formal\n- Keep it short (1–3 sentences)\n- Avoid emojis unless already present in input\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\nOutput only the rewritten text.\n</format>",
+            title: "Grammar & Spelling",
+            template: "Fix any grammar and spelling errors in the following text while preserving the original format, structure, tone, and meaning exactly as written.\n\n{input}\n\nOutput only the corrected text with no additional commentary.",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
@@ -145,15 +145,15 @@ extension SystemPrompt {
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
             title: "Code Review",
-            template: "<task>\nAnalyze the following code and list concrete issues.\n</task>\n\n<guidelines>\n- Include bugs, errors, security risks, performance problems, readability and maintainability concerns\n- Be specific and actionable\n- One issue per bullet; keep each to one sentence\n- Optionally include a severity tag prefix: [Bug], [Security], [Perf], [Style], [Maintainability], [Test]\n- If no issues are found, output \"No issues found.\"\n</guidelines>\n\n<code>\n{input}\n</code>\n\n<format>\n- [Severity] Issue description\n</format>",
+            template: "Review the following code and provide concise feedback:\n\n{input}\n\nList key issues as short bullet points. Include bugs, security risks, performance problems, and maintainability concerns. If no issues found, respond \"No issues found.\"\n\nFormat: Brief bullet points only.",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
         ),
         SystemPrompt(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
-            title: "Formal Email",
-            template: "<task>\nTransform the following notes into a formal, professional email.\n</task>\n\n<guidelines>\n- Create a clear subject line\n- Include greeting, concise body, and courteous closing\n- Use a professional tone\n- Organize with short paragraphs\n- Include call-to-action or next steps if present in input\n</guidelines>\n\n<input>\n{input}\n</input>\n\n<format>\nSubject: [Generated subject]\n\n[Email body]\n</format>",
+            title: "Email Polish",
+            template: "Improve the following email content while preserving its core message and intent:\n\n{input}\n\nEnhance clarity, professionalism, and tone. Maintain the original structure unless it needs significant improvement. Output only the improved email content.",
             isSystemPrompt: true,
             createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
             modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
