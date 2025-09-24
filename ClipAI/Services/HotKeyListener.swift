@@ -32,7 +32,14 @@ class HotKeyListener {
         modifiers: Int(cmdKey | optionKey),
         display: "⌘⌥3"
     )
-    
+
+    /// Default: ⌘⌥I
+    static let defaultChatImprovementShortcut = ShortcutSpec(
+        keyCode: Int(kVK_ANSI_I),
+        modifiers: Int(cmdKey | optionKey),
+        display: "⌘⌥I"
+    )
+
     /// Legacy default for migration: ⌃⌘⌥V
     static let legacyDefaultOneClickShortcut = ShortcutSpec(
         keyCode: Int(kVK_ANSI_V),
@@ -45,13 +52,20 @@ class HotKeyListener {
     private var oneClickAI1HotKey: HotKey?
     private var oneClickAI2HotKey: HotKey?
     private var oneClickAI3HotKey: HotKey?
+    private var chatImprovementHotKey: HotKey?
     private weak var popupController: PopupController?
+    private weak var chatImprovementController: ChatImprovementController?
 
     /// Initialize the hotkey listener with a popup controller
     init(popupController: PopupController) {
         self.popupController = popupController
         // Note: Hotkeys will be registered by the caller after initialization
         // to avoid double registration and ensure proper timing
+    }
+
+    /// Set the chat improvement controller for handling chat improvement shortcuts
+    func setChatImprovementController(_ controller: ChatImprovementController?) {
+        self.chatImprovementController = controller
     }
     
     /// Handle hotkey press event
@@ -82,6 +96,13 @@ class HotKeyListener {
             self.performOneClickAIForCurrentClipboard(action: 3)
         }
     }
+
+    /// Handle chat improvement hotkey press
+    private func handleChatImprovementHotKeyPressed() {
+        DispatchQueue.main.async {
+            self.performChatImprovement()
+        }
+    }
     
     /// Perform one-click AI processing using configured provider and system prompt for the specified action
     private func performOneClickAIForCurrentClipboard(action: Int) {
@@ -94,23 +115,43 @@ class HotKeyListener {
             }
         }
     }
-    
+
+    /// Perform chat improvement by checking for last processed result and showing chat window
+    private func performChatImprovement() {
+        Task { @MainActor in
+            // Check if there's a recent AI processing result to improve
+            guard let lastResult = OneClickAIProcessor.shared.getLastProcessedResult() else {
+                AppLog("HotKeyListener: No recent AI processing result available for improvement", level: .info, category: "ChatImprovement")
+                NSSound.beep()
+                return
+            }
+
+            // Show the chat improvement window
+            chatImprovementController?.showChatImprovement(
+                originalContent: lastResult.content,
+                originalResponse: lastResult.response
+            )
+        }
+    }
+
     // MARK: - Public Controls
     /// Enable hotkey registration
     func enable() {
-        AppLog("Enabling hotkeys - show: \(hotKey != nil), oneClick1: \(oneClickAI1HotKey != nil), oneClick2: \(oneClickAI2HotKey != nil), oneClick3: \(oneClickAI3HotKey != nil)", level: .info, category: "Hotkeys")
+        AppLog("Enabling hotkeys - show: \(hotKey != nil), oneClick1: \(oneClickAI1HotKey != nil), oneClick2: \(oneClickAI2HotKey != nil), oneClick3: \(oneClickAI3HotKey != nil), chatImprovement: \(chatImprovementHotKey != nil)", level: .info, category: "Hotkeys")
         hotKey?.isPaused = false
         oneClickAI1HotKey?.isPaused = false
         oneClickAI2HotKey?.isPaused = false
         oneClickAI3HotKey?.isPaused = false
+        chatImprovementHotKey?.isPaused = false
     }
-    
+
     /// Disable hotkey registration
     func disable() {
         hotKey?.isPaused = true
         oneClickAI1HotKey?.isPaused = true
         oneClickAI2HotKey?.isPaused = true
         oneClickAI3HotKey?.isPaused = true
+        chatImprovementHotKey?.isPaused = true
     }
 
     /// Unregister all hotkeys
@@ -119,6 +160,7 @@ class HotKeyListener {
         oneClickAI1HotKey = nil
         oneClickAI2HotKey = nil
         oneClickAI3HotKey = nil
+        chatImprovementHotKey = nil
     }
 
     /// Update all hotkeys at once. Old registrations are removed first.
@@ -127,11 +169,13 @@ class HotKeyListener {
     ///   - oneClickShortcut1: New One‑Click AI Action 1 shortcut
     ///   - oneClickShortcut2: New One‑Click AI Action 2 shortcut
     ///   - oneClickShortcut3: New One‑Click AI Action 3 shortcut
-    func update(showShortcut: ShortcutSpec, oneClickShortcut1: ShortcutSpec, oneClickShortcut2: ShortcutSpec, oneClickShortcut3: ShortcutSpec) {
+    ///   - chatImprovementShortcut: New Chat Improvement shortcut
+    func update(showShortcut: ShortcutSpec, oneClickShortcut1: ShortcutSpec, oneClickShortcut2: ShortcutSpec, oneClickShortcut3: ShortcutSpec, chatImprovementShortcut: ShortcutSpec) {
         updateShowShortcut(showShortcut)
         updateOneClickShortcut1(oneClickShortcut1)
         updateOneClickShortcut2(oneClickShortcut2)
         updateOneClickShortcut3(oneClickShortcut3)
+        updateChatImprovementShortcut(chatImprovementShortcut)
     }
 
     /// Update only the Show App shortcut
@@ -175,6 +219,16 @@ class HotKeyListener {
         AppLog("Updated one-click action 3 shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
     }
 
+    /// Update only the Chat Improvement shortcut
+    func updateChatImprovementShortcut(_ spec: ShortcutSpec) {
+        // Clean up previous hotkey
+        chatImprovementHotKey = nil
+        chatImprovementHotKey = makeHotKey(from: spec) { [weak self] in
+            self?.handleChatImprovementHotKeyPressed()
+        }
+        AppLog("Updated chat improvement shortcut to: \(spec.display)", level: .info, category: "Hotkeys")
+    }
+
     // MARK: - Helpers
     private func makeHotKey(from spec: ShortcutSpec, handler: @escaping () -> Void) -> HotKey? {
         // Translate ShortcutSpec (Carbon codes) into HotKey
@@ -194,5 +248,6 @@ class HotKeyListener {
         oneClickAI1HotKey = nil
         oneClickAI2HotKey = nil
         oneClickAI3HotKey = nil
+        chatImprovementHotKey = nil
     }
 } 

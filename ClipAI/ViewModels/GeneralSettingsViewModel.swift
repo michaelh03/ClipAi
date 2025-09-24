@@ -14,10 +14,12 @@ final class GeneralSettingsViewModel: ObservableObject {
     @Published var oneClick1ShortcutDisplay: String
     @Published var oneClick2ShortcutDisplay: String
     @Published var oneClick3ShortcutDisplay: String
+    @Published var chatImprovementShortcutDisplay: String
     @Published var showShortcutMessage: InlineMessage?
     @Published var oneClick1ShortcutMessage: InlineMessage?
     @Published var oneClick2ShortcutMessage: InlineMessage?
     @Published var oneClick3ShortcutMessage: InlineMessage?
+    @Published var chatImprovementShortcutMessage: InlineMessage?
     @Published var isStartAtLoginEnabled: Bool {
         didSet {
             // Avoid redundant writes
@@ -44,6 +46,7 @@ final class GeneralSettingsViewModel: ObservableObject {
     @Published private(set) var oneClick1ShortcutSpec: ShortcutSpec
     @Published private(set) var oneClick2ShortcutSpec: ShortcutSpec
     @Published private(set) var oneClick3ShortcutSpec: ShortcutSpec
+    @Published private(set) var chatImprovementShortcutSpec: ShortcutSpec
     
     // MARK: - Font Size Constants
     /// Default font size for previews
@@ -84,20 +87,24 @@ final class GeneralSettingsViewModel: ObservableObject {
         
         let persistedOneClick2: ShortcutSpec = SettingsStorage.loadShortcut(for: .oneClickShortcut2) ?? HotKeyListener.defaultOneClickShortcut2
         let persistedOneClick3: ShortcutSpec = SettingsStorage.loadShortcut(for: .oneClickShortcut3) ?? HotKeyListener.defaultOneClickShortcut3
+        let persistedChatImprovement: ShortcutSpec = SettingsStorage.loadShortcut(for: .chatImprovementShortcut) ?? HotKeyListener.defaultChatImprovementShortcut
 
         self.showShortcutSpec = persistedShow
         self.oneClick1ShortcutSpec = persistedOneClick1
         self.oneClick2ShortcutSpec = persistedOneClick2
         self.oneClick3ShortcutSpec = persistedOneClick3
+        self.chatImprovementShortcutSpec = persistedChatImprovement
 
         self.showShortcutDisplay = persistedShow.display
         self.oneClick1ShortcutDisplay = persistedOneClick1.display
         self.oneClick2ShortcutDisplay = persistedOneClick2.display
         self.oneClick3ShortcutDisplay = persistedOneClick3.display
+        self.chatImprovementShortcutDisplay = persistedChatImprovement.display
         self.showShortcutMessage = nil
         self.oneClick1ShortcutMessage = nil
         self.oneClick2ShortcutMessage = nil
         self.oneClick3ShortcutMessage = nil
+        self.chatImprovementShortcutMessage = nil
         // Reflect actual system setting managed by LaunchAtLogin
         self.isStartAtLoginEnabled = LaunchAtLogin.isEnabled
         
@@ -146,6 +153,15 @@ final class GeneralSettingsViewModel: ObservableObject {
         oneClick3ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
     }
 
+    func resetChatImprovementToDefault() {
+        let defaultSpec = HotKeyListener.defaultChatImprovementShortcut
+        chatImprovementShortcutSpec = defaultSpec
+        chatImprovementShortcutDisplay = defaultSpec.display
+        SettingsStorage.saveShortcut(defaultSpec, for: .chatImprovementShortcut)
+        NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+        chatImprovementShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
+    }
+
     // MARK: - Updates from Recorder
     func updateShow(from spec: ShortcutSpec?) {
         guard let spec = spec else {
@@ -181,6 +197,13 @@ final class GeneralSettingsViewModel: ObservableObject {
         if isDuplicate(spec, with: oneClick3ShortcutSpec) {
             showShortcutMessage = InlineMessage(
                 text: "Conflicts with One‑Click AI Action 3 shortcut.",
+                isError: true
+            )
+            return
+        }
+        if isDuplicate(spec, with: chatImprovementShortcutSpec) {
+            showShortcutMessage = InlineMessage(
+                text: "Conflicts with Improve AI Response shortcut.",
                 isError: true
             )
             return
@@ -293,6 +316,37 @@ final class GeneralSettingsViewModel: ObservableObject {
         }
     }
 
+    func updateChatImprovement(from spec: ShortcutSpec?) {
+        guard let spec = spec else {
+            chatImprovementShortcutDisplay = ""
+            chatImprovementShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            return
+        }
+
+        guard hasRequiredModifiers(spec) else {
+            chatImprovementShortcutMessage = InlineMessage(
+                text: "Shortcut must include ⌘ and at least one of ⌃, ⌥, or ⇧.",
+                isError: true
+            )
+            return
+        }
+
+        if let conflictMessage = getChatImprovementConflictMessage(for: spec) {
+            chatImprovementShortcutMessage = InlineMessage(text: conflictMessage, isError: true)
+            return
+        }
+
+        chatImprovementShortcutSpec = spec
+        chatImprovementShortcutDisplay = spec.display
+        SettingsStorage.saveShortcut(spec, for: .chatImprovementShortcut)
+        NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+        if let warning = commonSystemShortcutWarning(for: spec) {
+            chatImprovementShortcutMessage = InlineMessage(text: warning, isError: false)
+        } else {
+            chatImprovementShortcutMessage = InlineMessage(text: "Updated", isError: false)
+        }
+    }
+
     // MARK: - Validation Helpers
     private func hasRequiredModifiers(_ spec: ShortcutSpec) -> Bool {
         let mods = spec.modifiers
@@ -326,6 +380,26 @@ final class GeneralSettingsViewModel: ObservableObject {
         }
         if excluding != 3 && isDuplicate(spec, with: oneClick3ShortcutSpec) {
             return "Conflicts with One‑Click AI Action 3 shortcut."
+        }
+        return nil
+    }
+
+    /// Get conflict message for chat improvement shortcut
+    private func getChatImprovementConflictMessage(for spec: ShortcutSpec) -> String? {
+        if isDuplicate(spec, with: showShortcutSpec) {
+            return "Conflicts with Show App shortcut."
+        }
+        if isDuplicate(spec, with: oneClick1ShortcutSpec) {
+            return "Conflicts with One‑Click AI Action 1 shortcut."
+        }
+        if isDuplicate(spec, with: oneClick2ShortcutSpec) {
+            return "Conflicts with One‑Click AI Action 2 shortcut."
+        }
+        if isDuplicate(spec, with: oneClick3ShortcutSpec) {
+            return "Conflicts with One‑Click AI Action 3 shortcut."
+        }
+        if isDuplicate(spec, with: chatImprovementShortcutSpec) {
+            return "Conflicts with Improve AI Response shortcut."
         }
         return nil
     }

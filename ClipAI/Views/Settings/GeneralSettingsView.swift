@@ -79,6 +79,24 @@ struct GeneralSettingsView: View {
                 }
             }
 
+            // Chat Improvement
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Edit AI Response")
+                    Spacer()
+                    Button("Reset to default") { viewModel.resetChatImprovementToDefault() }
+                        .buttonStyle(.borderless)
+                }
+
+                recorderRow(initialDisplay: viewModel.chatImprovementShortcutDisplay, message: viewModel.chatImprovementShortcutMessage) { spec in
+                    viewModel.updateChatImprovement(from: spec)
+                }
+
+                Text("Opens a chat window to refine your most recent AI response.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
             Text("Must include ⌘ and at least one additional modifier.")
                 .font(.caption)
                 .foregroundColor(.secondary)

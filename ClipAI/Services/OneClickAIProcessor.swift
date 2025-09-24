@@ -5,6 +5,10 @@ import AppKit
 @MainActor
 final class OneClickAIProcessor {
     static let shared = OneClickAIProcessor()
+
+    /// Stores the last processed content and AI response for potential improvement
+    private(set) var lastProcessedResult: (content: String, response: String)?
+
     private init() {}
 
     /// Check if one-click processing is ready for a specific action (default provider and action's prompt configured)
@@ -64,6 +68,9 @@ final class OneClickAIProcessor {
         )
       
 
+        // Store the result for potential improvement
+        lastProcessedResult = (content: content, response: response)
+
         // Write response to system clipboard
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -94,6 +101,17 @@ final class OneClickAIProcessor {
     /// - Returns: The response written to the clipboard, or nil if no clipboard text
     func processCurrentClipboardToClipboard() async throws -> String? {
         return try await processCurrentClipboardToClipboard(action: 1)
+    }
+
+    /// Get the last processed result for chat improvement
+    /// - Returns: Tuple of original content and AI response, or nil if no recent processing
+    func getLastProcessedResult() -> (content: String, response: String)? {
+        return lastProcessedResult
+    }
+
+    /// Clear the stored last processed result
+    func clearLastProcessedResult() {
+        lastProcessedResult = nil
     }
 }
 

@@ -91,7 +91,7 @@ class PopupController: NSWindowController {
       // Hide popup without restoring focus (we'll handle focus ourselves)
       self.hidePastePopup()
       
-      // Delay to allow popup to fully hide
+      // Delay to allow popup to fully hidp
 //      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
 //        if let app = previousApp {
 //          // Use proper activation options to ensure focus
@@ -126,7 +126,6 @@ class PopupController: NSWindowController {
 
     // Set the hosting view as the window's content view
     window.contentView = hostingView
-
   }
 
   /// Check if accessibility permissions are granted

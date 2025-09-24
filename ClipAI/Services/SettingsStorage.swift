@@ -11,9 +11,10 @@ enum GeneralSettingsKeys: String {
     case oneClickShortcut1 = "general.oneClickShortcut1"
     case oneClickShortcut2 = "general.oneClickShortcut2"
     case oneClickShortcut3 = "general.oneClickShortcut3"
+    case chatImprovementShortcut = "general.chatImprovementShortcut"
     case previewFontSize = "general.previewFontSize"
     case previewTheme = "general.previewTheme"
-    
+
     // Legacy key for migration
     case oneClickShortcut = "general.oneClickShortcut"
 }

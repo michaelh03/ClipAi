@@ -14,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var clipboardStore: ClipboardStore?
     private var popupController: PopupController?
     private var hotKeyListener: HotKeyListener?
+    private var chatImprovementController: ChatImprovementController?
     private var settingsWindowController: LLMSettingsWindowController?
     private var generalSettingsViewModel: GeneralSettingsViewModel?
     private var aiActivityCount: Int = 0
@@ -31,10 +32,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize popup controller
         if let store = clipboardStore, let generalSettings = generalSettingsViewModel {
             popupController = PopupController(clipboardStore: store, generalSettingsViewModel: generalSettings)
-            
+
+            // Initialize chat improvement controller
+            chatImprovementController = ChatImprovementController()
+
             // Initialize hotkey listener with popup controller
             if let popup = popupController {
                 hotKeyListener = HotKeyListener(popupController: popup)
+
+                // Set up chat improvement controller with hotkey listener
+                hotKeyListener?.setChatImprovementController(chatImprovementController)
                 // Load persisted shortcuts or defaults
                 let showSpec = SettingsStorage.loadShortcut(for: .showShortcut) ?? HotKeyListener.defaultShowShortcut
                 
@@ -52,11 +59,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 
                 let oneClick2Spec = SettingsStorage.loadShortcut(for: .oneClickShortcut2) ?? HotKeyListener.defaultOneClickShortcut2
                 let oneClick3Spec = SettingsStorage.loadShortcut(for: .oneClickShortcut3) ?? HotKeyListener.defaultOneClickShortcut3
-                
+                let chatImprovementSpec = SettingsStorage.loadShortcut(for: .chatImprovementShortcut) ?? HotKeyListener.defaultChatImprovementShortcut
+
                 // Defer registration to next runloop to ensure system is ready
                 DispatchQueue.main.async { [weak self] in
                     guard let listener = self?.hotKeyListener else { return }
-                    listener.update(showShortcut: showSpec, oneClickShortcut1: oneClick1Spec, oneClickShortcut2: oneClick2Spec, oneClickShortcut3: oneClick3Spec)
+                    listener.update(showShortcut: showSpec, oneClickShortcut1: oneClick1Spec, oneClickShortcut2: oneClick2Spec, oneClickShortcut3: oneClick3Spec, chatImprovementShortcut: chatImprovementSpec)
                     listener.enable()
                 }
                 
@@ -67,7 +75,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let newOneClick1 = SettingsStorage.loadShortcut(for: .oneClickShortcut1) ?? HotKeyListener.defaultOneClickShortcut1
                     let newOneClick2 = SettingsStorage.loadShortcut(for: .oneClickShortcut2) ?? HotKeyListener.defaultOneClickShortcut2
                     let newOneClick3 = SettingsStorage.loadShortcut(for: .oneClickShortcut3) ?? HotKeyListener.defaultOneClickShortcut3
-                    listener.update(showShortcut: newShow, oneClickShortcut1: newOneClick1, oneClickShortcut2: newOneClick2, oneClickShortcut3: newOneClick3)
+                    let newChatImprovement = SettingsStorage.loadShortcut(for: .chatImprovementShortcut) ?? HotKeyListener.defaultChatImprovementShortcut
+                    listener.update(showShortcut: newShow, oneClickShortcut1: newOneClick1, oneClickShortcut2: newOneClick2, oneClickShortcut3: newOneClick3, chatImprovementShortcut: newChatImprovement)
                 }
             }
         }
