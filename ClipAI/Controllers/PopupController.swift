@@ -86,7 +86,7 @@ class PopupController: NSWindowController {
     self.popupViewModel?.pasteRequestedHandler = { [weak self] in
       guard let self = self else { return }
       // Capture the previous app before hiding popup
-      let previousApp = self.previouslyFrontmostApp
+//      let previousApp = self.previouslyFrontmostApp
       
       // Hide popup without restoring focus (we'll handle focus ourselves)
       self.hidePastePopup()
