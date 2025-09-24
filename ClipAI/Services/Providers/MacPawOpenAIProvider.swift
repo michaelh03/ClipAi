@@ -241,6 +241,7 @@ class MacPawOpenAIProvider: LLMProvider {
             AppLogger.shared.warn("OpenAIError mapped to LLMError provider=\(id) description=\(mapped.errorDescription ?? "")", category: "LLM")
             return mapped
         }
+      
         
         // Handle HTTP response errors if available
         if let nsError = error as NSError? {
