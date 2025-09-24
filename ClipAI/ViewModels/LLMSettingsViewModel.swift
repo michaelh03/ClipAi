@@ -80,8 +80,7 @@ class LLMSettingsViewModel: ObservableObject {
     @Published var editingPrompt: SystemPrompt? = nil
     
     // MARK: - Services
-    
-    private let keychainService: KeychainService
+
     private let providerRegistry: LLMProviderRegistry
     /// UserDefaults key used to store API keys per provider
     private let apiKeysDefaultsKey: String = "apiKeys"
@@ -122,9 +121,8 @@ class LLMSettingsViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(keychainService: KeychainService = KeychainService(), providerRegistry: LLMProviderRegistry = LLMProviderRegistry.shared, promptStore: PromptStore? = nil, generalSettingsViewModel: GeneralSettingsViewModel) {
+    init(providerRegistry: LLMProviderRegistry = LLMProviderRegistry.shared, promptStore: PromptStore? = nil, generalSettingsViewModel: GeneralSettingsViewModel) {
         AppLog("Initializing LLMSettingsViewModel", level: .info, category: "Settings")
-        self.keychainService = keychainService
         self.providerRegistry = providerRegistry
         self.generalSettingsViewModel = generalSettingsViewModel
         // Allow injection for tests; otherwise, computed property will use shared on first access
@@ -183,18 +181,14 @@ class LLMSettingsViewModel: ObservableObject {
             validationError = "API key cannot be empty"
             return
         }
-        
-        do {
-            // Validate format without persisting or mutating stored key.
-            try keychainService.validateAPIKeyFormat(apiKeyInput, for: selectedProvider.id)
 
-            // If we get here, the key is valid format-wise
+        // Basic format validation based on provider
+        let isValidFormat = validateAPIKeyFormat(apiKeyInput, for: selectedProvider.id)
+
+        if isValidFormat {
             apiKeyIsValid = true
             validationError = nil
-        } catch let error as LLMError {
-            apiKeyIsValid = false
-            validationError = error.errorDescription
-        } catch {
+        } else {
             apiKeyIsValid = false
             validationError = "Invalid API key format"
         }
@@ -685,5 +679,22 @@ class LLMSettingsViewModel: ObservableObject {
         }
         
         return capabilities
+    }
+
+    /// Validate API key format based on provider
+    private func validateAPIKeyFormat(_ apiKey: String, for providerId: String) -> Bool {
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty else { return false }
+
+        switch providerId {
+        case "openai":
+            return trimmedKey.hasPrefix("sk-")
+        case "gemini":
+            return trimmedKey.hasPrefix("AI")
+        case "claude":
+            return trimmedKey.hasPrefix("sk-ant-")
+        default:
+            return !trimmedKey.isEmpty
+        }
     }
 }

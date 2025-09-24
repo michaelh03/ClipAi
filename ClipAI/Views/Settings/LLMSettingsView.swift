@@ -14,7 +14,6 @@ struct LLMSettingsView: View {
     
     init(generalSettingsViewModel: GeneralSettingsViewModel) {
         self._viewModel = StateObject(wrappedValue: LLMSettingsViewModel(
-            keychainService: KeychainService(),
             providerRegistry: LLMProviderRegistry.shared,
             promptStore: nil,
             generalSettingsViewModel: generalSettingsViewModel
