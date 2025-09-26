@@ -35,9 +35,8 @@ struct CodePreviewView: View {
     }
     
     private var mainContainer: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 12) {
             toolbar
-            Divider()  
             contentArea
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -58,7 +57,14 @@ struct CodePreviewView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(0.04))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                )
+        )
     }
     
     private var languageIndicator: some View {
@@ -89,14 +95,20 @@ struct CodePreviewView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if showStats {
                     codeStatistics
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
                 }
-                
+
                 codeTextView
             }
+            .padding(16)
         }
-        .background(Color(NSColor.textBackgroundColor))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(0.02))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                )
+        )
     }
     
     /// Code text view with syntax highlighting
@@ -112,8 +124,15 @@ struct CodePreviewView: View {
         .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
         .textSelection(.enabled)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
+                )
+        )
         .task {
             // HighlightSwift automatically detects the language using highlight.js
             // We indicate this by showing "Auto-detected" with high confidence
@@ -124,15 +143,15 @@ struct CodePreviewView: View {
     
     /// Code statistics view
     private var codeStatistics: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Code Statistics")
-                .font(.headline)
+                .font(.system(.subheadline, weight: .semibold))
                 .foregroundColor(.primary)
-            
+
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
-            ], alignment: .leading, spacing: 8) {
+            ], alignment: .leading, spacing: 12) {
                 statisticItem("Language", value: detectedLanguage ?? "Unknown")
                 statisticItem("Characters", value: min(item.content.count, PreviewConfig.maxPreviewCharacters))
                 statisticItem("Lines", value: lineCount)
@@ -140,8 +159,14 @@ struct CodePreviewView: View {
             }
         }
         .padding(12)
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(0.04))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                )
+        )
     }
     
     /// Individual statistic item

@@ -2,140 +2,246 @@ import SwiftUI
 import AppKit
 import Foundation
 
-/// A SwiftUI view that displays a single clipboard item in a row format
+// MARK: - Content Type Support
+
+/// Enum to categorize clipboard content for better UI representation
+enum ContentType {
+    case text
+    case url
+    case multiline
+    case longText
+}
+
+/// View that displays appropriate icon for different content types
+struct ContentTypeIcon: View {
+    let type: ContentType
+
+    var body: some View {
+        Group {
+            switch type {
+            case .url:
+                Image(systemName: "link")
+                    .foregroundColor(.blue)
+            case .multiline:
+                Image(systemName: "text.alignleft")
+                    .foregroundColor(.purple)
+            case .longText:
+                Image(systemName: "doc.text")
+                    .foregroundColor(.orange)
+            case .text:
+                Image(systemName: "textformat")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .font(.system(size: 11, weight: .medium))
+    }
+}
+
+/// A SwiftUI view that displays a single clipboard item in a modern card format
 struct ClipItemRowView: View {
     let clipItem: ClipItem
     @State private var isHovered = false
     @State private var showingLLMRequest = false
     @State private var isAnyAPIKeyConfigured = false
-    
+
     // One-click processing states
     @State private var isProcessingWithAI = false
     @State private var showSuccessIndicator = false
     @State private var showErrorMessage: String? = nil
-    
+
     // Services
     private let keychainService = KeychainService()
-    
+
     // MARK: - Computed Properties
-    
+
     /// Check if one-click processing is available (requires default provider and prompt)
     private var isOneClickProcessingAvailable: Bool {
         // Check if default provider and at least one prompt are configured
-        return isAnyAPIKeyConfigured && 
+        return isAnyAPIKeyConfigured &&
                (UserDefaults.standard.string(forKey: "userSelectedPrompt1") != nil ||
                 UserDefaults.standard.string(forKey: "userSelectedPrompt2") != nil ||
                 UserDefaults.standard.string(forKey: "userSelectedPrompt3") != nil)
     }
-    
+
+    /// Get content type for better UI styling
+    private var contentType: ContentType {
+        if clipItem.content.hasPrefix("http://") || clipItem.content.hasPrefix("https://") {
+            return .url
+        } else if clipItem.content.contains("\n") && clipItem.content.count > 100 {
+            return .multiline
+        } else if clipItem.content.count > 100 {
+            return .longText
+        } else {
+            return .text
+        }
+    }
+
+    /// Get preview text with better formatting
+    private var formattedPreview: String {
+        switch contentType {
+        case .url:
+            return clipItem.content
+        case .multiline:
+            return clipItem.content.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? clipItem.preview
+        default:
+            return clipItem.preview
+        }
+    }
+
     var body: some View {
-        HStack(spacing: 12) {
-            // Source app icon
-            SourceAppIconView(clipItem: clipItem)
-                .frame(width: 20, height: 20)
-            
-            // Content preview area
-            VStack(alignment: .leading, spacing: 6) {
-                // Main content preview with monospaced font and line clamping
-                Text(clipItem.preview)
-                .font(.system(.headline, design: .monospaced, weight: .regular))
-                    .lineLimit(1)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .opacity(isHovered ? 1.0 : 0.9)
-                
-                // Timestamp and content type info
-                HStack(spacing: 8) {
-                   if let relative = clipItem.relativeDateDescription {
-                       Text(relative)
-                           .font(.system(.caption2, weight: .light))
-                           .foregroundColor(.secondary)
-                   }
-                    
-                    if clipItem.content.count > 80 {
-                        Spacer()
-                        Text("\(clipItem.content.count) chars")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                // Source app icon with improved styling
+                SourceAppIconView(clipItem: clipItem)
+                    .frame(width: 24, height: 24)
+                    .background(
+                        Circle()
+                            .fill(Color.primary.opacity(0.05))
+                            .scaleEffect(isHovered ? 1.1 : 1.0)
+                    )
+                    .animation(.easeInOut(duration: 0.2), value: isHovered)
+
+                // Content preview area with better hierarchy
+                VStack(alignment: .leading, spacing: 4) {
+                    // Content type indicator and preview
+                    HStack(spacing: 8) {
+                        ContentTypeIcon(type: contentType)
+
+                        Text(formattedPreview)
+                            .font(.system(.body, weight: .medium))
+                            .lineLimit(1)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
+                    }
+
+                    // Secondary line with metadata
+                    HStack(spacing: 8) {
+                        if let relative = clipItem.relativeDateDescription {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 10, weight: .medium))
+                                Text(relative)
+                                    .font(.system(.caption, weight: .medium))
+                            }
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.1), in: Capsule())
-                    }
-                }
-                .opacity(isHovered ? 0.9 : 0.7)
-            }
-            
-            Spacer(minLength: 8)
-            
-            // Ask AI Button (hover-triggered)
-            if isHovered {
-                Button(action: {
-                    // Check if one-click processing is available
-                    if isOneClickProcessingAvailable {
-                        performOneClickAIProcessing()
-                    } else {
-                        // Fallback to existing modal behavior
-                        showingLLMRequest = true
-                    }
-                }) {
-                    Group {
-                        if isProcessingWithAI {
-                            // Show loading indicator during processing
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        } else if showSuccessIndicator {
-                            // Show success checkmark
-                            Image(systemName: "checkmark")
-                                .font(.system(.caption, weight: .medium))
-                                .foregroundColor(.green)
-                        } else {
-                            // Show sparkles icon with different styling based on availability
-                            Image(systemName: "sparkles")
-                                .font(.system(.caption, weight: .medium))
-                                .foregroundColor(isAnyAPIKeyConfigured ? .accentColor : .secondary)
+                        }
+
+                        if contentType == .multiline {
+                            HStack(spacing: 4) {
+                                Image(systemName: "text.alignleft")
+                                    .font(.system(size: 10, weight: .medium))
+                                Text("\(clipItem.content.components(separatedBy: .newlines).count) lines")
+                                    .font(.system(.caption, weight: .medium))
+                            }
+                            .foregroundColor(.secondary)
+                        } else if clipItem.content.count > 50 {
+                            HStack(spacing: 4) {
+                                Image(systemName: "textformat.size")
+                                    .font(.system(size: 10, weight: .medium))
+                                Text("\(clipItem.content.count) chars")
+                                    .font(.system(.caption, weight: .medium))
+                            }
+                            .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        // Action buttons area
+                        HStack(spacing: 8) {
+                            // Error message display
+                            if let errorMessage = showErrorMessage {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .font(.system(size: 10, weight: .medium))
+                                    Text("Error")
+                                        .font(.system(.caption2, weight: .medium))
+                                }
+                                .foregroundColor(.red)
+                                .help(errorMessage)
+                                .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                            }
+
+                            // Ask AI Button (hover-triggered)
+                            if isHovered && showErrorMessage == nil {
+                                Button(action: {
+                                    // Check if one-click processing is available
+                                    if isOneClickProcessingAvailable {
+                                        performOneClickAIProcessing()
+                                    } else {
+                                        // Fallback to existing modal behavior
+                                        showingLLMRequest = true
+                                    }
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Group {
+                                            if isProcessingWithAI {
+                                                ProgressView()
+                                                    .scaleEffect(0.7)
+                                            } else if showSuccessIndicator {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.green)
+                                            } else {
+                                                Image(systemName: "sparkles")
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(isAnyAPIKeyConfigured ? .accentColor : .secondary)
+                                            }
+                                        }
+
+                                        if !isProcessingWithAI && !showSuccessIndicator {
+                                            Text("AI")
+                                                .font(.system(.caption2, weight: .semibold))
+                                                .foregroundColor(isAnyAPIKeyConfigured ? .accentColor : .secondary)
+                                        }
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        Capsule()
+                                            .fill(isAnyAPIKeyConfigured ? Color.accentColor.opacity(0.1) : Color.secondary.opacity(0.1))
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .disabled(!isAnyAPIKeyConfigured || isProcessingWithAI)
+                                .help(getButtonHelpText())
+                                .transition(.asymmetric(
+                                    insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                    removal: .scale(scale: 0.8).combined(with: .opacity)
+                                ))
+                            }
+
+                            // Copy indicator (always visible but subtle)
+                            if !isHovered || showErrorMessage != nil {
+                                Image(systemName: "doc.on.doc")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.secondary.opacity(0.6))
+                            }
                         }
                     }
                 }
-                .buttonStyle(PlainButtonStyle())
-                .disabled(!isAnyAPIKeyConfigured || isProcessingWithAI)
-                .help(getButtonHelpText())
-                .transition(.asymmetric(
-                    insertion: .opacity.animation(.easeInOut(duration: 0.12)),
-                    removal: .opacity.animation(.easeInOut(duration: 0.12))
-                ))
+
+                Spacer(minLength: 0)
             }
-            
-            // Error message display
-            if let errorMessage = showErrorMessage {
-                Text("Error")
-                    .font(.system(.caption2, weight: .medium))
-                    .foregroundColor(.red)
-                    .help(errorMessage)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-            }
-            
-            // Subtle indicator icon (space always reserved to avoid text shift)
-            if showErrorMessage == nil {
-                Image(systemName: "doc.on.doc")
-                    .font(.system(.caption, weight: .medium))
-                    .foregroundColor(.accentColor.opacity(0.7))
-                    .opacity(isHovered ? 0.7 : 0) // Fade in/out on hover, slightly dimmed when Ask AI is visible
-                    .frame(width: 14) // Reserve constant width
-            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.primary.opacity(0.03) : Color.clear)
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(
+                            isHovered ? Color.primary.opacity(0.1) : Color.clear,
+                            lineWidth: 1
+                        )
+                )
         )
         .contentShape(Rectangle()) // Makes entire row tappable
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovered = hovering
             }
         }
-        .animation(.easeInOut(duration: 0.15), value: isHovered)
         .onAppear {
             checkAPIKeyConfiguration()
         }

@@ -38,19 +38,17 @@ struct PopupView: View {
     HStack(spacing: 0) {
       // Left pane - clipboard list
       VStack(spacing: 0) {
-        // Header with enhanced styling
-        HeaderView(viewModel: viewModel)
-
         // Search field
         SearchBarView(
-          text: $viewModel.searchText, 
+          text: $viewModel.searchText,
           focus: $searchFieldFocus,
           onArrowKey: {
             viewModel.focusList()
           }
         )
           .padding(.horizontal, 16)
-          .padding(.vertical, 8)
+          .padding(.top, 16)
+          .padding(.bottom, 8)
 
         // Content with smooth transitions
         ZStack {

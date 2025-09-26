@@ -28,31 +28,42 @@ struct PreviewWindowView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header section
+            // Header section with modern styling
             PreviewHeaderView(
                 item: item,
                 isVisible: $isVisible
             )
-            .frame(height: 44)
-            
-            // Divider between header and content
-            Divider()
-            
-            // Content section
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.regularMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                    )
+            )
+            .padding(.top, 12)
+            .padding(.horizontal, 12)
+
+            // Content section with modern card styling
             PreviewContentView(
                 item: item,
                 providerRegistry: providerRegistry,
                 generalSettingsViewModel: generalSettingsViewModel
             )
+            .padding(.top, 8)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(width: paneWidth)
         .frame(minWidth: minWidth, maxWidth: maxWidth)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(.regularMaterial)
         .overlay(
-            // Left border
-            Rectangle()
-                .fill(Color(NSColor.separatorColor))
+            // Left border with modern styling
+            RoundedRectangle(cornerRadius: 0)
+                .fill(Color.primary.opacity(0.1))
                 .frame(width: 1),
             alignment: .leading
         )

@@ -18,32 +18,44 @@ struct PreviewContentView: View {
     @Namespace private var previewTransition
     
     var body: some View {
-        Group {
-            if let item = item {
-                // Find and use appropriate provider
-                if let provider = providerRegistry.findProvider(for: item) {
-                    provider.createPreview(for: item, generalSettingsViewModel: generalSettingsViewModel)
-                        .id("preview-\(item.id)")
-                        .matchedGeometryEffect(id: "content", in: previewTransition)
-                } else {
-                    // Fallback to basic text preview if no provider found
-                    TextPreviewView(item: item, generalSettingsViewModel: generalSettingsViewModel)
-                        .id("preview-\(item.id)")
-                        .matchedGeometryEffect(id: "content", in: previewTransition)
-                }
+        contentView
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.regularMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                    )
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(.easeInOut(duration: 0.3), value: item?.id)
+            // Accessibility support
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Preview Content")
+            .accessibilityHint(item != nil ? "Showing preview content" : "No content to preview")
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        if let item = item {
+            // Find and use appropriate provider
+            if let provider = providerRegistry.findProvider(for: item) {
+                provider.createPreview(for: item, generalSettingsViewModel: generalSettingsViewModel)
+                    .id("preview-\(item.id)")
+                    .matchedGeometryEffect(id: "content", in: previewTransition)
             } else {
-                // Show empty state when no item is selected
-                EmptyPreviewView()
-                    .id("preview-empty")
+                // Fallback to basic text preview if no provider found
+                TextPreviewView(item: item, generalSettingsViewModel: generalSettingsViewModel)
+                    .id("preview-\(item.id)")
                     .matchedGeometryEffect(id: "content", in: previewTransition)
             }
+        } else {
+            // Show empty state when no item is selected
+            EmptyPreviewView()
+                .id("preview-empty")
+                .matchedGeometryEffect(id: "content", in: previewTransition)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(.easeInOut(duration: 0.3), value: item?.id)
-        // Accessibility support
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Preview Content")
-        .accessibilityHint(item != nil ? "Showing preview content" : "No content to preview")
     }
 }
 
