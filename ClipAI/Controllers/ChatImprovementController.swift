@@ -75,22 +75,29 @@ class ChatImprovementController: NSWindowController {
         // Disable popup keyboard monitoring while chat window is active
         popupController?.popupViewModel?.disableKeyboardMonitoring()
 
-        // Create or configure the view model
-        let viewModel = ChatImprovementViewModel()
+        // Create or reuse the view model
+        let viewModel: ChatImprovementViewModel
+        if let existingViewModel = self.chatViewModel {
+            viewModel = existingViewModel
+        } else {
+            viewModel = ChatImprovementViewModel()
+
+            // Set up callbacks only for new view models
+            viewModel.closeRequestedHandler = { [weak self] in
+                self?.hideChatWindow()
+            }
+
+            viewModel.copyResponseHandler = { [weak self] response in
+                AppLog("ChatImprovementController: Response copied to clipboard: \(response.prefix(50))...", level: .info, category: "ChatImprovement")
+                // The response is already copied to clipboard in the view model
+                // We could add additional actions here if needed
+            }
+
+            self.chatViewModel = viewModel
+        }
+
+        // Configure the view model with the content
         viewModel.configure(originalContent: originalContent, originalResponse: originalResponse)
-
-        // Set up callbacks
-        viewModel.closeRequestedHandler = { [weak self] in
-            self?.hideChatWindow()
-        }
-
-        viewModel.copyResponseHandler = { [weak self] response in
-            AppLog("ChatImprovementController: Response copied to clipboard: \(response.prefix(50))...", level: .info, category: "ChatImprovement")
-            // The response is already copied to clipboard in the view model
-            // We could add additional actions here if needed
-        }
-
-        self.chatViewModel = viewModel
 
         // Create the SwiftUI view
         let chatView = ChatImprovementView(viewModel: viewModel)
@@ -136,9 +143,14 @@ class ChatImprovementController: NSWindowController {
         stopMonitoringForOutsideClicks()
         window?.orderOut(nil)
 
-        // Clear the view model
-        chatViewModel = nil
+        // Clear the hosting view but keep the view model to preserve history
         hostingView = nil
+    }
+
+    /// Clear the stored view model to start fresh with new content
+    func clearChatHistory() {
+        AppLog("ChatImprovementController: Clearing chat history", level: .info, category: "ChatImprovement")
+        chatViewModel = nil
     }
 
     /// Toggle chat window visibility

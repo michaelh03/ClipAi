@@ -109,7 +109,12 @@ class HotKeyListener {
         Task { @MainActor in
             do {
                 let result = try await OneClickAIProcessor.shared.processCurrentClipboardToClipboard(action: action)
-                if result == nil { NSSound.beep() }
+                if result == nil {
+                    NSSound.beep()
+                } else {
+                    // Clear chat history when new AI processing succeeds
+                    chatImprovementController?.clearChatHistory()
+                }
             } catch {
                 NSSound.beep()
             }

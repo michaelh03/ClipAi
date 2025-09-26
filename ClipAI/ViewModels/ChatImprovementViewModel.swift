@@ -58,15 +58,19 @@ class ChatImprovementViewModel: ObservableObject {
     ///   - originalContent: The original clipboard content
     ///   - originalResponse: The AI's initial response
     func configure(originalContent: String, originalResponse: String) {
+        let isNewContent = self.originalContent != originalContent || self.originalResponse != originalResponse
+
         self.originalContent = originalContent
         self.originalResponse = originalResponse
 
-        // Initialize chat history with the original response
-        self.chatHistory = [
-            ChatMessage.aiMessage(originalResponse)
-        ]
+        // Only reset chat history if this is new content
+        if isNewContent {
+            self.chatHistory = [
+                ChatMessage.aiMessage(originalResponse)
+            ]
+        }
 
-        // Clear any previous state
+        // Clear any current state (but preserve chat history)
         self.currentInput = ""
         self.isProcessing = false
         self.hasError = false
@@ -149,7 +153,7 @@ class ChatImprovementViewModel: ObservableObject {
         return chatHistory.last(where: { !$0.isUser })?.content
     }
 
-    /// Clear the chat and reset state
+    /// Clear the chat and reset to original response only
     func resetChat() {
         chatHistory = [
             ChatMessage.aiMessage(originalResponse)
@@ -159,6 +163,24 @@ class ChatImprovementViewModel: ObservableObject {
         hasError = false
         errorMessage = nil
         progressMessage = ""
+    }
+
+    /// Force reset for new AI content - called when a new AI operation is triggered
+    func forceResetForNewContent(originalContent: String, originalResponse: String) {
+        self.originalContent = originalContent
+        self.originalResponse = originalResponse
+
+        // Always reset history for new content
+        self.chatHistory = [
+            ChatMessage.aiMessage(originalResponse)
+        ]
+
+        // Clear any current state
+        self.currentInput = ""
+        self.isProcessing = false
+        self.hasError = false
+        self.errorMessage = nil
+        self.progressMessage = ""
     }
 
     /// Request to close the window
