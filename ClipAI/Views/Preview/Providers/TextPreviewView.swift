@@ -15,45 +15,65 @@ struct TextPreviewView: View {
     @State private var showStats = false
     
     var body: some View {
-        VStack(spacing: 0) {
-                        // Controls toolbar
+        VStack(spacing: 12) {
+            // Controls toolbar
             HStack {
                 Spacer()
 
                 // Statistics toggle
                 Button(action: { showStats.toggle() }) {
                     Image(systemName: showStats ? "info.circle.fill" : "info.circle")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .help("Toggle text statistics")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color(NSColor.controlBackgroundColor))
-            
-            Divider()
-            
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.primary.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                    )
+            )
+
             // Content area
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     // Text statistics (if enabled)
                     if showStats {
                         textStatistics
-                            .padding(.horizontal, 16)
-                            .padding(.top, 12)
                     }
-                    
+
                     // Main text content
                     Text(item.content)
-                    .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
+                        .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
                         .foregroundColor(.primary)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(.regularMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
+                                )
+                        )
                 }
+                .padding(16)
             }
-            .background(Color(NSColor.textBackgroundColor))
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.primary.opacity(0.02))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                    )
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // Accessibility
@@ -64,15 +84,15 @@ struct TextPreviewView: View {
     
     /// Text statistics view
     private var textStatistics: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Text Statistics")
-                .font(.headline)
+                .font(.system(.subheadline, weight: .semibold))
                 .foregroundColor(.primary)
-            
+
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
-            ], alignment: .leading, spacing: 8) {
+            ], alignment: .leading, spacing: 12) {
                 statisticItem("Characters", value: item.content.count)
                 statisticItem("Words", value: wordCount)
                 statisticItem("Lines", value: lineCount)
@@ -80,8 +100,14 @@ struct TextPreviewView: View {
             }
         }
         .padding(12)
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(0.04))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                )
+        )
     }
     
     /// Individual statistic item

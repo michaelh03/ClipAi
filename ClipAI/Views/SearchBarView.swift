@@ -1,9 +1,8 @@
 import SwiftUI
 import AppKit
 
-/// A macOS search field wrapped for SwiftUI that immediately forwards text changes via binding
-/// and automatically becomes first responder when the view appears.
-struct SearchBarView: NSViewRepresentable {
+/// A modern search field with clean styling that matches the updated clipboard UI
+struct SearchBarView: View {
     @Binding var text: String
     var placeholder: String = "Search clipboard…"
     /// When set `true` the field requests focus. The value is reset to `false` after focusing.
@@ -11,68 +10,93 @@ struct SearchBarView: NSViewRepresentable {
     /// Callback when arrow keys are pressed to transfer focus back to list
     var onArrowKey: (() -> Void)?
 
-    // MARK: - NSViewRepresentable
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+    @FocusState private var isFieldFocused: Bool
+    @State private var isHovered: Bool = false
 
-    func makeNSView(context: Context) -> NSSearchField {
-        let field = NSSearchField(string: text)
-        field.placeholderString = placeholder
-        field.delegate = context.coordinator
-        field.sendsSearchStringImmediately = true
-        field.focusRingType = .none
-        field.translatesAutoresizingMaskIntoConstraints = false
-        // Reduce unneeded bezel so it blends with popup material
-        field.bezelStyle = .roundedBezel
-        // Increase font size for better readability
-        field.font = NSFont.systemFont(ofSize: 16)
-        return field
-    }
-
-    func updateNSView(_ nsView: NSSearchField, context: Context) {
-        if nsView.stringValue != text {
-            nsView.stringValue = text
-        }
-        // Focus management
-        if focus, nsView.window != nil, nsView.window?.firstResponder != nsView {
-            AppLog("SearchField requesting focus...", level: .debug, category: "Popup")
-            DispatchQueue.main.async {
-                let didBecome = nsView.becomeFirstResponder()
-                AppLog("SearchField became first responder: \(didBecome)", level: .debug, category: "Popup")
-                // Reset the toggle so future updates don't steal focus
-                focus = false
-            }
-        }
-    }
-
-    // MARK: - Coordinator
-    class Coordinator: NSObject, NSSearchFieldDelegate {
-        private let parent: SearchBarView
-        init(_ parent: SearchBarView) { self.parent = parent }
-
-        func controlTextDidChange(_ obj: Notification) {
-            guard let field = obj.object as? NSSearchField else { return }
-            AppLog("SearchBar text changed: '\(field.stringValue)'", level: .debug, category: "Popup")
-            parent.text = field.stringValue
-        }
-
-        /// Handle special key commands (Escape, Arrow keys)
-        func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
-            if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
-                // Intercept Escape
-                if !parent.text.isEmpty {
-                    parent.text = ""
-                    return true // handled – don't propagate
+    var body: some View {
+        content
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isHovered = hovering
                 }
-            } else if commandSelector == #selector(NSResponder.moveUp(_:)) ||
-                      commandSelector == #selector(NSResponder.moveDown(_:)) {
-                // Handle arrow keys - transfer focus back to list
-                AppLog("SearchBar: Arrow key pressed, transferring focus to list", level: .debug, category: "Popup")
-                parent.onArrowKey?()
-                return true // handled – don't propagate
             }
-            return false
+            .onChange(of: focus) { _, shouldFocus in
+                if shouldFocus {
+                    isFieldFocused = true
+                    focus = false // Reset the binding
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: isFieldFocused)
+            .animation(.easeInOut(duration: 0.15), value: text.isEmpty)
+    }
+
+    private var content: some View {
+        HStack(spacing: 12) {
+            searchIcon
+            textField
+            clearButton
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(backgroundView)
+    }
+
+    private var searchIcon: some View {
+        Image(systemName: "magnifyingglass")
+            .font(.system(size: 16, weight: .medium))
+            .foregroundColor(.secondary)
+            .opacity(text.isEmpty ? 0.6 : 0.8)
+    }
+
+    private var textField: some View {
+        TextField(placeholder, text: $text)
+            .focused($isFieldFocused)
+            .font(.system(size: 16, weight: .medium))
+            .textFieldStyle(PlainTextFieldStyle())
+            .submitLabel(.search)
+            .onSubmit {
+                // Handle search submission if needed
+            }
+    }
+
+    @ViewBuilder
+    private var clearButton: some View {
+        if !text.isEmpty {
+            Button(action: {
+                text = ""
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .transition(.scale.combined(with: .opacity))
         }
     }
+
+    private var backgroundView: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color.primary.opacity(0.04))
+            .overlay(borderView)
+    }
+
+    private var borderView: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .strokeBorder(borderColor, lineWidth: borderWidth)
+    }
+
+    private var borderColor: Color {
+        if isFieldFocused {
+            return Color.accentColor.opacity(0.5)
+        } else if isHovered {
+            return Color.primary.opacity(0.15)
+        } else {
+            return Color.primary.opacity(0.08)
+        }
+    }
+
+    private var borderWidth: CGFloat {
+        isFieldFocused ? 1.5 : 1
+    }
+
 }

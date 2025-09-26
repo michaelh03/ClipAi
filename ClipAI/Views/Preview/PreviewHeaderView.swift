@@ -12,32 +12,63 @@ struct PreviewHeaderView: View {
     @Binding var isVisible: Bool
     
     var body: some View {
-        HStack(spacing: 8) {
-            // Content type icon and label
+        HStack(spacing: 12) {
+            // Content type icon and label with modern styling
             if let item = item {
-                Label {
-                    Text(item.contentType.displayName)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                } icon: {
+                HStack(spacing: 8) {
                     Image(systemName: item.contentType.iconName)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 20, height: 20)
+                        .background(
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.1))
+                        )
+
+                    Text(item.contentType.displayName)
+                        .font(.system(.body, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: 8) {
+                    Image(systemName: "doc.questionmark")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 20, height: 20)
+                        .background(
+                            Circle()
+                                .fill(Color.secondary.opacity(0.1))
+                        )
+
+                    Text("No Preview")
+                        .font(.system(.body, weight: .semibold))
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .lineLimit(1)
-                .truncationMode(.tail)
-            } else {
-                Label("No Preview", systemImage: "doc.questionmark")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
 
+            // Close button for preview pane
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isVisible = false
+                }
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .frame(width: 24, height: 24)
+                    .background(
+                        Circle()
+                            .fill(Color.secondary.opacity(0.1))
+                    )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help("Close Preview")
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(NSColor.controlBackgroundColor))
+        // Remove the old background styling since it's handled by parent
         // Accessibility support
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Preview Header")
