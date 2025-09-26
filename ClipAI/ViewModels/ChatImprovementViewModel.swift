@@ -144,6 +144,7 @@ class ChatImprovementViewModel: ObservableObject {
 
         // Notify handler
         copyResponseHandler?(latestAIResponse)
+        requestClose()
 
         AppLog("ChatImprovementViewModel: Copied improved response to clipboard", level: .info, category: "ChatImprovement")
     }
