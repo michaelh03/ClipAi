@@ -18,7 +18,7 @@ class PopupController: NSWindowController {
   private let clipboardStore: ClipboardStore
   private let generalSettingsViewModel: GeneralSettingsViewModel
   private var hostingView: NSHostingView<PopupView>?
-  private var popupViewModel: PopupViewModel?
+  var popupViewModel: PopupViewModel?
   private var previouslyFrontmostApp: NSRunningApplication?
 
   /// Initialize the popup controller with a clipboard store and general settings

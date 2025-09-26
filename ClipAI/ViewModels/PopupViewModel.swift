@@ -380,6 +380,18 @@ extension PopupViewModel {
     }
   }
 
+  /// Disable keyboard monitoring when other views need keyboard input
+  func disableKeyboardMonitoring() {
+    AppLog("PopupViewModel: Disabling keyboard monitoring", level: .debug, category: "Popup")
+    stopKeyboardMonitoring()
+  }
+
+  /// Re-enable keyboard monitoring when popup regains focus
+  func enableKeyboardMonitoring() {
+    AppLog("PopupViewModel: Enabling keyboard monitoring", level: .debug, category: "Popup")
+    startKeyboardMonitoring()
+  }
+
   // MARK: - Preview Management
 
   /// Update the preview selection based on the currently selected item

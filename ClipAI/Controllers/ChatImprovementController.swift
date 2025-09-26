@@ -17,9 +17,11 @@ class ChatImprovementController: NSWindowController {
     private var hostingView: NSHostingView<ChatImprovementView>?
     private var chatViewModel: ChatImprovementViewModel?
     private var outsideClickMonitor: Any?
+    private weak var popupController: PopupController?
 
     /// Initialize the chat improvement controller
-    init() {
+    init(popupController: PopupController? = nil) {
+        self.popupController = popupController
         // Create the window with proper styling
         let window = ChatImprovementWindow(
             contentRect: NSRect(x: 0, y: 0, width: 500, height: 600),
@@ -69,6 +71,9 @@ class ChatImprovementController: NSWindowController {
         guard let window = window else { return }
 
         AppLog("ChatImprovementController: Showing chat improvement window", level: .info, category: "ChatImprovement")
+
+        // Disable popup keyboard monitoring while chat window is active
+        popupController?.popupViewModel?.disableKeyboardMonitoring()
 
         // Create or configure the view model
         let viewModel = ChatImprovementViewModel()
@@ -124,6 +129,9 @@ class ChatImprovementController: NSWindowController {
     /// Hide the chat improvement window
     func hideChatWindow() {
         AppLog("ChatImprovementController: Hiding chat improvement window", level: .info, category: "ChatImprovement")
+
+        // Re-enable popup keyboard monitoring when chat window closes
+        popupController?.popupViewModel?.enableKeyboardMonitoring()
 
         stopMonitoringForOutsideClicks()
         window?.orderOut(nil)

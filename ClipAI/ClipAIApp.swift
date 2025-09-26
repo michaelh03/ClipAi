@@ -33,8 +33,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let store = clipboardStore, let generalSettings = generalSettingsViewModel {
             popupController = PopupController(clipboardStore: store, generalSettingsViewModel: generalSettings)
 
-            // Initialize chat improvement controller
-            chatImprovementController = ChatImprovementController()
+            // Initialize chat improvement controller with popup controller reference
+            chatImprovementController = ChatImprovementController(popupController: popupController)
 
             // Initialize hotkey listener with popup controller
             if let popup = popupController {
