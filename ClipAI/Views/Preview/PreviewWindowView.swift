@@ -27,36 +27,11 @@ struct PreviewWindowView: View {
     private let maxWidth: CGFloat = 800
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header section with modern styling
-            PreviewHeaderView(
-                item: item,
-                isVisible: $isVisible
-            )
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.regularMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-                    )
-            )
-            .padding(.top, 12)
-            .padding(.horizontal, 12)
-
-            // Content section with modern card styling
-            PreviewContentView(
-                item: item,
-                providerRegistry: providerRegistry,
-                generalSettingsViewModel: generalSettingsViewModel
-            )
-            .padding(.top, 8)
-            .padding(.horizontal, 12)
-            .padding(.bottom, 12)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
+        PreviewContentView(
+            item: item,
+            providerRegistry: providerRegistry,
+            generalSettingsViewModel: generalSettingsViewModel
+        )
         .frame(width: paneWidth)
         .frame(minWidth: minWidth, maxWidth: maxWidth)
         .background(.regularMaterial)
