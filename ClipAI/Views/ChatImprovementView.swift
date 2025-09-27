@@ -20,19 +20,22 @@ struct ChatImprovementView: View {
             headerView
 
             // Main content area
-            if viewModel.isProcessing {
-                processingView
-            } else {
-                chatContentView
-            }
+            chatContentView
 
             // Input area
             inputView
         }
         .frame(width: 500, height: 600)
-        .background(Color(NSColor.windowBackgroundColor))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.regularMaterial)
+                .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+                )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .onAppear {
             // Focus input field when view appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -40,9 +43,15 @@ struct ChatImprovementView: View {
                 scrollToBottom()
             }
         }
-        .onChange(of: viewModel.chatHistory.count) {
+        .onChange(of: viewModel.chatHistory.count) { _, _ in
             // Scroll to bottom when new messages are added
             scrollToBottom()
+        }
+        .onChange(of: viewModel.isProcessing) { _, isProcessing in
+            // Scroll to bottom when processing state changes
+            if isProcessing {
+                scrollToBottom()
+            }
         }
     }
 
@@ -74,8 +83,8 @@ struct ChatImprovementView: View {
 
             Divider()
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
         .padding(.bottom, 12)
     }
 
@@ -84,7 +93,7 @@ struct ChatImprovementView: View {
     private var chatContentView: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 8) {
                     // Show original content context
                     originalContentView
 
@@ -99,13 +108,24 @@ struct ChatImprovementView: View {
                         errorMessageView(errorMessage)
                     }
 
+                    // Loading indicator at bottom of chat
+                    if viewModel.isProcessing {
+                        loadingIndicatorView
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .scale(scale: 0.9)),
+                                removal: .opacity
+                            ))
+                    }
+
                     // Invisible spacer for scrolling
                     Color.clear
                         .frame(height: 1)
                         .id("bottom")
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 12)
+                .animation(.easeInOut(duration: 0.3), value: viewModel.chatHistory.count)
+                .animation(.easeInOut(duration: 0.4), value: viewModel.isProcessing)
             }
             .onAppear {
                 scrollViewProxy = proxy
@@ -131,10 +151,10 @@ struct ChatImprovementView: View {
                 .font(.system(.body, design: .monospaced))
                 .padding(12)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 12)
                         .fill(Color(NSColor.controlBackgroundColor))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: 12)
                                 .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
                         )
                 )
@@ -147,26 +167,57 @@ struct ChatImprovementView: View {
     // MARK: - Chat Message View
 
     private func chatMessageView(_ message: ChatMessage) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 8) {
             if message.isUser {
-                Spacer(minLength: 40)
+                Spacer(minLength: 60)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                // Message bubble
-                Text(message.content)
-                    .font(.body)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(message.isUser ? Color.accentColor : Color(NSColor.controlBackgroundColor))
-                    )
-                    .foregroundColor(message.isUser ? .white : .primary)
-                    .textSelection(.enabled)
+            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
+                // Message bubble with improved styling
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(message.content)
+                        .font(.body)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                }
+                .background(
+                    Group {
+                        if message.isUser {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.accentColor)
+                                .shadow(
+                                    color: Color.black.opacity(0.15),
+                                    radius: 4,
+                                    x: 0,
+                                    y: 2
+                                )
+                        } else {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.regularMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                                )
+                                .shadow(
+                                    color: Color.black.opacity(0.08),
+                                    radius: 2,
+                                    x: 0,
+                                    y: 1
+                                )
+                        }
+                    }
+                )
+                .foregroundColor(message.isUser ? .white : .primary)
+                .textSelection(.enabled)
 
-                // Timestamp and actions
-                HStack {
+                // Timestamp and actions row
+                HStack(spacing: 8) {
+                    if message.isUser {
+                        Spacer()
+                    }
+
                     Text(message.formattedTimestamp)
                         .font(.caption2)
                         .foregroundColor(.secondary)
@@ -175,27 +226,42 @@ struct ChatImprovementView: View {
                         Button(action: {
                             viewModel.copyLatestResponse()
                         }) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 3) {
                                 Image(systemName: "doc.on.clipboard")
                                     .font(.caption2)
                                 Text("Copy")
                                     .font(.caption2)
+                                    .fontWeight(.medium)
                             }
                             .foregroundColor(.accentColor)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.accentColor.opacity(0.1))
+                            )
                         }
+                        .keyboardShortcut("c", modifiers: [.command])
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.leading, 8)
+                        .scaleEffect(1.0)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: false)
                     }
 
-                    Spacer()
+                    if !message.isUser {
+                        Spacer()
+                    }
                 }
-                .padding(.horizontal, message.isUser ? 16 : 4)
+                .padding(.horizontal, 4)
             }
 
             if !message.isUser {
-                Spacer(minLength: 40)
+                Spacer(minLength: 60)
             }
         }
+        .transition(.asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: 0.95).combined(with: .move(edge: .bottom))),
+            removal: .opacity.combined(with: .scale(scale: 0.9))
+        ))
     }
 
     // MARK: - Error Message View
@@ -213,13 +279,62 @@ struct ChatImprovementView: View {
         }
         .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color.red.opacity(0.1))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
                 )
         )
+    }
+
+    // MARK: - Loading Indicator View
+
+    private var loadingIndicatorView: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Spacer(minLength: 60)
+
+            VStack(alignment: .leading, spacing: 6) {
+                // Loading bubble with typing animation
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+
+                    Text(viewModel.progressMessage.isEmpty ? "Thinking..." : viewModel.progressMessage)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .animation(.easeInOut(duration: 0.5), value: viewModel.progressMessage)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.regularMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                        )
+                        .shadow(
+                            color: Color.black.opacity(0.08),
+                            radius: 2,
+                            x: 0,
+                            y: 1
+                        )
+                )
+
+                // Timestamp placeholder
+                HStack {
+                    Text("Now")
+                        .font(.caption2)
+                        .foregroundColor(.secondary.opacity(0.7))
+                    Spacer()
+                }
+                .padding(.horizontal, 4)
+            }
+
+            Spacer(minLength: 60)
+        }
     }
 
     // MARK: - Processing View
@@ -249,9 +364,9 @@ struct ChatImprovementView: View {
         VStack(spacing: 0) {
             Divider()
 
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 // Input field with send button
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     TextField("How would you like to improve this response?", text: $viewModel.currentInput, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .focused($isInputFieldFocused)
@@ -296,8 +411,8 @@ struct ChatImprovementView: View {
                     .foregroundColor(.secondary)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
     }
 
@@ -305,7 +420,7 @@ struct ChatImprovementView: View {
 
     private func scrollToBottom() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(.easeOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: 0.4)) {
               scrollViewProxy?.scrollTo("bottom", anchor: UnitPoint.bottom)
             }
         }
