@@ -20,11 +20,7 @@ struct ChatImprovementView: View {
             headerView
 
             // Main content area
-            if viewModel.isProcessing {
-                processingView
-            } else {
-                chatContentView
-            }
+            chatContentView
 
             // Input area
             inputView
@@ -50,6 +46,12 @@ struct ChatImprovementView: View {
         .onChange(of: viewModel.chatHistory.count) { _, _ in
             // Scroll to bottom when new messages are added
             scrollToBottom()
+        }
+        .onChange(of: viewModel.isProcessing) { _, isProcessing in
+            // Scroll to bottom when processing state changes
+            if isProcessing {
+                scrollToBottom()
+            }
         }
     }
 
@@ -106,6 +108,15 @@ struct ChatImprovementView: View {
                         errorMessageView(errorMessage)
                     }
 
+                    // Loading indicator at bottom of chat
+                    if viewModel.isProcessing {
+                        loadingIndicatorView
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .scale(scale: 0.9)),
+                                removal: .opacity
+                            ))
+                    }
+
                     // Invisible spacer for scrolling
                     Color.clear
                         .frame(height: 1)
@@ -113,6 +124,8 @@ struct ChatImprovementView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 12)
+                .animation(.easeInOut(duration: 0.3), value: viewModel.chatHistory.count)
+                .animation(.easeInOut(duration: 0.4), value: viewModel.isProcessing)
             }
             .onAppear {
                 scrollViewProxy = proxy
@@ -273,6 +286,55 @@ struct ChatImprovementView: View {
                         .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
                 )
         )
+    }
+
+    // MARK: - Loading Indicator View
+
+    private var loadingIndicatorView: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Spacer(minLength: 60)
+
+            VStack(alignment: .leading, spacing: 6) {
+                // Loading bubble with typing animation
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+
+                    Text(viewModel.progressMessage.isEmpty ? "Thinking..." : viewModel.progressMessage)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .animation(.easeInOut(duration: 0.5), value: viewModel.progressMessage)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.regularMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                        )
+                        .shadow(
+                            color: Color.black.opacity(0.08),
+                            radius: 2,
+                            x: 0,
+                            y: 1
+                        )
+                )
+
+                // Timestamp placeholder
+                HStack {
+                    Text("Now")
+                        .font(.caption2)
+                        .foregroundColor(.secondary.opacity(0.7))
+                    Spacer()
+                }
+                .padding(.horizontal, 4)
+            }
+
+            Spacer(minLength: 60)
+        }
     }
 
     // MARK: - Processing View
