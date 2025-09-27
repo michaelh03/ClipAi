@@ -1,68 +1,28 @@
 import SwiftUI
 
-/// Color preview implementation with color display and format information
-///
-/// This view provides a visual representation of color values with detailed
-/// format information, color conversions, and accessibility features.
+/// Clean color preview
 struct ColorPreviewView: View {
     /// The clipboard item containing color data
     let item: ClipItem
-    
+
     /// Parsed color information
     @State private var colorInfo: ColorInfo?
-    
-    /// Whether to show detailed color information
-    @State private var showDetails = true
-    
+
     /// Size of the main color swatch
     private let swatchSize: CGFloat = 120
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Controls toolbar
-            HStack {
-                Text("Color Preview")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                // Details toggle
-                Button(action: { showDetails.toggle() }) {
-                    Image(systemName: showDetails ? "info.circle.fill" : "info.circle")
-                }
-                .buttonStyle(PlainButtonStyle())
-                .help("Toggle color details")
+        ScrollView {
+            VStack(spacing: 20) {
+                colorSwatchView
+                colorDetailsView
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color(NSColor.controlBackgroundColor))
-            
-            Divider()
-            
-            // Content area
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Main color display
-                    colorSwatchView
-                    
-                    // Color details (if enabled)
-                    if showDetails {
-                        colorDetailsView
-                    }
-                }
-                .padding(20)
-            }
-            .background(Color(NSColor.textBackgroundColor))
+            .padding(20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             parseColorFromContent()
         }
-        // Accessibility
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Color Preview")
-        .accessibilityValue(colorInfo?.description ?? "Invalid color")
     }
     
     /// Main color swatch display
@@ -74,35 +34,25 @@ struct ColorPreviewView: View {
                 .frame(width: swatchSize, height: swatchSize)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-            
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+
             // Original format
-            VStack(spacing: 4) {
-                Text("Original Format")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(item.content)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundColor(.primary)
-                    .textSelection(.enabled)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(6)
-            }
+            Text(item.content)
+                .font(.system(.body, design: .monospaced))
+                .foregroundColor(.primary)
+                .textSelection(.enabled)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(.regularMaterial)
+                .cornerRadius(8)
         }
     }
     
     /// Detailed color information
     private var colorDetailsView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Color Information")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
+        Group {
             if let colorInfo = colorInfo {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
@@ -113,33 +63,10 @@ struct ColorPreviewView: View {
                     colorFormatItem("HSL", value: colorInfo.hslValue)
                     colorFormatItem("Brightness", value: String(format: "%.1f%%", colorInfo.brightness * 100))
                 }
-                
-                // Color properties
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Properties")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    HStack {
-                        colorPropertyChip("Brightness: \(colorInfo.brightnessCategory)")
-                        if colorInfo.hasAlpha {
-                            colorPropertyChip("Has Alpha")
-                        }
-                    }
-                }
-                .padding(.top, 8)
-                
             } else {
-                Text("Unable to parse color information")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .italic()
+                EmptyView()
             }
         }
-        .padding(16)
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(12)
     }
     
     /// Individual color format item
@@ -148,27 +75,16 @@ struct ColorPreviewView: View {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
+
             Text(value)
                 .font(.system(.subheadline, design: .monospaced))
                 .foregroundColor(.primary)
                 .textSelection(.enabled)
                 .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color(NSColor.textBackgroundColor))
-                .cornerRadius(4)
+                .padding(.vertical, 6)
+                .background(.regularMaterial)
+                .cornerRadius(6)
         }
-    }
-    
-    /// Color property chip
-    private func colorPropertyChip(_ text: String) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundColor(.primary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color(NSColor.selectedControlColor).opacity(0.3))
-            .cornerRadius(12)
     }
     
     /// Parse color information from the clipboard content

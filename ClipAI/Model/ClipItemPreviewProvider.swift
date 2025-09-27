@@ -288,19 +288,17 @@ struct BasicTextPreviewProvider: ClipItemPreviewProvider {
             if content.count <= limit { return content }
             return String(content.prefix(limit)) + "…"
         }()
-        
+
         return AnyView(
-            VStack(alignment: .leading, spacing: 8) {
+            ScrollView {
                 Text(truncatedContent)
-                    .font(.system(size: generalSettingsViewModel.previewFontSize, design: .monospaced))
+                    .font(.system(size: generalSettingsViewModel.previewFontSize))
                     .foregroundColor(.primary)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Divider()
+                    .padding(16)
             }
-            .frame(maxHeight: .infinity, alignment: .top)
-            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         )
     }
 }
