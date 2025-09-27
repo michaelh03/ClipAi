@@ -25,72 +25,57 @@ struct GeneralSettingsView: View {
 
             // Show App
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Show App")
-                    Spacer()
-                    Button("Reset to default") { viewModel.resetShowToDefault() }
-                        .buttonStyle(.borderless)
-                }
+                Text("Show App")
 
-                recorderRow(initialDisplay: viewModel.showShortcutDisplay, message: viewModel.showShortcutMessage) { spec in
+                recorderRow(initialDisplay: viewModel.showShortcutDisplay, message: viewModel.showShortcutMessage, onChange: { spec in
                     viewModel.updateShow(from: spec)
-                }
+                }, onResetToDefault: {
+                    viewModel.clearShowShortcut()
+                })
             }
 
             // One-Click AI Action 1
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("One-Click AI Action 1")
-                    Spacer()
-                    Button("Reset to default") { viewModel.resetOneClick1ToDefault() }
-                        .buttonStyle(.borderless)
-                }
+                Text("One-Click AI Action 1")
 
-                recorderRow(initialDisplay: viewModel.oneClick1ShortcutDisplay, message: viewModel.oneClick1ShortcutMessage) { spec in
+                recorderRow(initialDisplay: viewModel.oneClick1ShortcutDisplay, message: viewModel.oneClick1ShortcutMessage, onChange: { spec in
                     viewModel.updateOneClick1(from: spec)
-                }
+                }, onResetToDefault: {
+                    viewModel.clearOneClick1Shortcut()
+                })
             }
             
             // One-Click AI Action 2
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("One-Click AI Action 2")
-                    Spacer()
-                    Button("Reset to default") { viewModel.resetOneClick2ToDefault() }
-                        .buttonStyle(.borderless)
-                }
+                Text("One-Click AI Action 2")
 
-                recorderRow(initialDisplay: viewModel.oneClick2ShortcutDisplay, message: viewModel.oneClick2ShortcutMessage) { spec in
+                recorderRow(initialDisplay: viewModel.oneClick2ShortcutDisplay, message: viewModel.oneClick2ShortcutMessage, onChange: { spec in
                     viewModel.updateOneClick2(from: spec)
-                }
+                }, onResetToDefault: {
+                    viewModel.clearOneClick2Shortcut()
+                })
             }
             
             // One-Click AI Action 3
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("One-Click AI Action 3")
-                    Spacer()
-                    Button("Reset to default") { viewModel.resetOneClick3ToDefault() }
-                        .buttonStyle(.borderless)
-                }
+                Text("One-Click AI Action 3")
 
-                recorderRow(initialDisplay: viewModel.oneClick3ShortcutDisplay, message: viewModel.oneClick3ShortcutMessage) { spec in
+                recorderRow(initialDisplay: viewModel.oneClick3ShortcutDisplay, message: viewModel.oneClick3ShortcutMessage, onChange: { spec in
                     viewModel.updateOneClick3(from: spec)
-                }
+                }, onResetToDefault: {
+                    viewModel.clearOneClick3Shortcut()
+                })
             }
 
             // Chat Improvement
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Edit AI Response")
-                    Spacer()
-                    Button("Reset to default") { viewModel.resetChatImprovementToDefault() }
-                        .buttonStyle(.borderless)
-                }
+                Text("Edit AI Response")
 
-                recorderRow(initialDisplay: viewModel.chatImprovementShortcutDisplay, message: viewModel.chatImprovementShortcutMessage) { spec in
+                recorderRow(initialDisplay: viewModel.chatImprovementShortcutDisplay, message: viewModel.chatImprovementShortcutMessage, onChange: { spec in
                     viewModel.updateChatImprovement(from: spec)
-                }
+                }, onResetToDefault: {
+                    viewModel.clearChatImprovementShortcut()
+                })
 
                 Text("Opens a chat window to refine your most recent AI response.")
                     .font(.caption)
@@ -103,12 +88,12 @@ struct GeneralSettingsView: View {
         }
     }
 
-    private func recorderRow(initialDisplay: String, message: GeneralSettingsViewModel.InlineMessage?, onChange: @escaping (ShortcutSpec?) -> Void) -> some View {
+    private func recorderRow(initialDisplay: String, message: GeneralSettingsViewModel.InlineMessage?, onChange: @escaping (ShortcutSpec?) -> Void, onResetToDefault: @escaping () -> Void) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 12) {
-                ShortcutRecorderView(initialDisplay: initialDisplay) { spec in
+                ShortcutRecorderView(initialDisplay: initialDisplay, onChange: { spec in
                     onChange(spec)
-                }
+                }, onResetToDefault: onResetToDefault)
             }
 
             if let message = message {

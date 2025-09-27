@@ -116,8 +116,8 @@ final class GeneralSettingsViewModel: ObservableObject {
     }
 
     // MARK: - Intent
-    func resetShowToDefault() {
-        // Apply default spec, persist, and notify so runtime hotkeys update immediately
+    func clearShowShortcut() {
+        // Reset to default spec, persist, and notify so runtime hotkeys update immediately
         let defaultSpec = HotKeyListener.defaultShowShortcut
         showShortcutSpec = defaultSpec
         showShortcutDisplay = defaultSpec.display
@@ -126,7 +126,7 @@ final class GeneralSettingsViewModel: ObservableObject {
         showShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
     }
 
-    func resetOneClick1ToDefault() {
+    func clearOneClick1Shortcut() {
         let defaultSpec = HotKeyListener.defaultOneClickShortcut1
         oneClick1ShortcutSpec = defaultSpec
         oneClick1ShortcutDisplay = defaultSpec.display
@@ -134,8 +134,8 @@ final class GeneralSettingsViewModel: ObservableObject {
         NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
         oneClick1ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
     }
-    
-    func resetOneClick2ToDefault() {
+
+    func clearOneClick2Shortcut() {
         let defaultSpec = HotKeyListener.defaultOneClickShortcut2
         oneClick2ShortcutSpec = defaultSpec
         oneClick2ShortcutDisplay = defaultSpec.display
@@ -143,8 +143,8 @@ final class GeneralSettingsViewModel: ObservableObject {
         NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
         oneClick2ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
     }
-    
-    func resetOneClick3ToDefault() {
+
+    func clearOneClick3Shortcut() {
         let defaultSpec = HotKeyListener.defaultOneClickShortcut3
         oneClick3ShortcutSpec = defaultSpec
         oneClick3ShortcutDisplay = defaultSpec.display
@@ -153,7 +153,7 @@ final class GeneralSettingsViewModel: ObservableObject {
         oneClick3ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
     }
 
-    func resetChatImprovementToDefault() {
+    func clearChatImprovementShortcut() {
         let defaultSpec = HotKeyListener.defaultChatImprovementShortcut
         chatImprovementShortcutSpec = defaultSpec
         chatImprovementShortcutDisplay = defaultSpec.display
@@ -165,8 +165,13 @@ final class GeneralSettingsViewModel: ObservableObject {
     // MARK: - Updates from Recorder
     func updateShow(from spec: ShortcutSpec?) {
         guard let spec = spec else {
-            showShortcutDisplay = ""
-            showShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            // Reset to default when clearing
+            let defaultSpec = HotKeyListener.defaultShowShortcut
+            showShortcutSpec = defaultSpec
+            showShortcutDisplay = defaultSpec.display
+            SettingsStorage.saveShortcut(defaultSpec, for: .showShortcut)
+            NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+            showShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
             return
         }
 
@@ -225,8 +230,13 @@ final class GeneralSettingsViewModel: ObservableObject {
 
     func updateOneClick1(from spec: ShortcutSpec?) {
         guard let spec = spec else {
-            oneClick1ShortcutDisplay = ""
-            oneClick1ShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            // Reset to default when clearing
+            let defaultSpec = HotKeyListener.defaultOneClickShortcut1
+            oneClick1ShortcutSpec = defaultSpec
+            oneClick1ShortcutDisplay = defaultSpec.display
+            SettingsStorage.saveShortcut(defaultSpec, for: .oneClickShortcut1)
+            NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+            oneClick1ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
             return
         }
 
@@ -256,8 +266,13 @@ final class GeneralSettingsViewModel: ObservableObject {
     
     func updateOneClick2(from spec: ShortcutSpec?) {
         guard let spec = spec else {
-            oneClick2ShortcutDisplay = ""
-            oneClick2ShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            // Reset to default when clearing
+            let defaultSpec = HotKeyListener.defaultOneClickShortcut2
+            oneClick2ShortcutSpec = defaultSpec
+            oneClick2ShortcutDisplay = defaultSpec.display
+            SettingsStorage.saveShortcut(defaultSpec, for: .oneClickShortcut2)
+            NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+            oneClick2ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
             return
         }
 
@@ -287,8 +302,13 @@ final class GeneralSettingsViewModel: ObservableObject {
     
     func updateOneClick3(from spec: ShortcutSpec?) {
         guard let spec = spec else {
-            oneClick3ShortcutDisplay = ""
-            oneClick3ShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            // Reset to default when clearing
+            let defaultSpec = HotKeyListener.defaultOneClickShortcut3
+            oneClick3ShortcutSpec = defaultSpec
+            oneClick3ShortcutDisplay = defaultSpec.display
+            SettingsStorage.saveShortcut(defaultSpec, for: .oneClickShortcut3)
+            NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+            oneClick3ShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
             return
         }
 
@@ -318,8 +338,13 @@ final class GeneralSettingsViewModel: ObservableObject {
 
     func updateChatImprovement(from spec: ShortcutSpec?) {
         guard let spec = spec else {
-            chatImprovementShortcutDisplay = ""
-            chatImprovementShortcutMessage = InlineMessage(text: "Cleared", isError: false)
+            // Reset to default when clearing
+            let defaultSpec = HotKeyListener.defaultChatImprovementShortcut
+            chatImprovementShortcutSpec = defaultSpec
+            chatImprovementShortcutDisplay = defaultSpec.display
+            SettingsStorage.saveShortcut(defaultSpec, for: .chatImprovementShortcut)
+            NotificationCenter.default.post(name: .generalShortcutsChanged, object: nil)
+            chatImprovementShortcutMessage = InlineMessage(text: "Reset to default", isError: false)
             return
         }
 

@@ -9,14 +9,16 @@ struct ShortcutRecorderView: View {
     // MARK: - Inputs
     let initialDisplay: String
     let onChange: (ShortcutSpec?) -> Void
+    let onResetToDefault: () -> Void
 
     // MARK: - Local State
     @State private var isRecording: Bool = false
     @State private var displayText: String
 
-    init(initialDisplay: String, onChange: @escaping (ShortcutSpec?) -> Void) {
+    init(initialDisplay: String, onChange: @escaping (ShortcutSpec?) -> Void, onResetToDefault: @escaping () -> Void) {
         self.initialDisplay = initialDisplay
         self.onChange = onChange
+        self.onResetToDefault = onResetToDefault
         _displayText = State(initialValue: initialDisplay)
     }
 
@@ -36,12 +38,10 @@ struct ShortcutRecorderView: View {
             }
             .buttonStyle(.bordered)
 
-            Button("Clear") {
-                displayText = ""
-                onChange(nil)
+            Button("Reset to Default") {
+                onResetToDefault()
             }
             .buttonStyle(.bordered)
-            .disabled(displayText.isEmpty)
 
             // Invisible capture view that becomes first responder while recording
             ShortcutCaptureRepresentable(isRecording: $isRecording) { spec in
@@ -50,6 +50,9 @@ struct ShortcutRecorderView: View {
             }
             .frame(width: 0, height: 0)
             .clipped()
+        }
+        .onChange(of: initialDisplay) { newValue in
+            displayText = newValue
         }
     }
 }
