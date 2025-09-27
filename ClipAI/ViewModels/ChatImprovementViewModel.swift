@@ -98,7 +98,7 @@ class ChatImprovementViewModel: ObservableObject {
         isProcessing = true
         hasError = false
         errorMessage = nil
-        progressMessage = "Improving response..."
+        progressMessage = "Sending to AI..."
 
         do {
             // Get default provider and AI configuration
@@ -123,7 +123,7 @@ class ChatImprovementViewModel: ObservableObject {
         } catch {
             hasError = true
             errorMessage = "Failed to improve response: \(error.localizedDescription)"
-            AppLog("ChatImprovementViewModel: Error improving response - \(error)", level: .error, category: "ChatImprovement")
+            AppLog("ChatImprovementViewModel: Error Sending to AI - \(error)", level: .error, category: "ChatImprovement")
         }
 
         isProcessing = false
