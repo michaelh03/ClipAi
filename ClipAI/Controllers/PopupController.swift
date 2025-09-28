@@ -145,8 +145,7 @@ class PopupController: NSWindowController {
       AppLog("PopupController: Using CGEvent method (accessibility enabled)", level: .debug, category: "Popup")
       sendPasteKeystrokeViaCGEvent()
     } else {
-      AppLog("PopupController: No accessibility permissions available", level: .warning, category: "Popup")
-      showAccessibilityPermissionAlert()
+      AppLog("PopupController: no accessibility permission ", level: .debug, category: "Popup")
     }
   }
   
@@ -192,6 +191,9 @@ class PopupController: NSWindowController {
     guard let window = window else { return }
     AppLog("PopupController: showPopup called", level: .info, category: "Popup")
 
+    // Close any stray tiny titled windows (mimics pressing the X button on default SwiftUI window)
+    closeStrayTitledWindows()
+
     // let mouseLocation = NSEvent.mouseLocation
     // (Cursor position no longer needed when centering)
 
@@ -214,7 +216,7 @@ class PopupController: NSWindowController {
     // Ensure the popup is visible in the current Space before activation
     window.orderFrontRegardless()
 
-    // Activate the app to allow keyboard input without causing a Space switch
+    // Activate the app so this popup can become key and receive keyboard input
     NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
 
     // Make the popup key
@@ -250,6 +252,8 @@ class PopupController: NSWindowController {
     stopMonitoringForOutsideClicks()
     popupViewModel?.searchText = ""
     window?.orderOut(nil)
+    // Deactivate our app immediately to avoid becoming frontmost
+    NSApp.deactivate()
     // Note: We don't restore focus here or clear previouslyFrontmostApp 
     // because the paste handler will manage focus restoration
   }
@@ -306,6 +310,22 @@ class PopupController: NSWindowController {
 }
 
 
+
+// MARK: - Stray tiny titled window cleaner
+extension PopupController {
+  /// Close any tiny titled windows created by SwiftUI's default WindowGroup
+  private func closeStrayTitledWindows() {
+    for other in NSApp.windows {
+      // Skip our own window
+      if other === self.window { continue }
+      // Close only very small titled windows to avoid closing Settings or other real windows
+      let size = other.frame.size
+      if other.styleMask.contains(.titled) && size.width <= 80 && size.height <= 80 {
+        other.close()
+      }
+    }
+  }
+}
 
 // MARK: - NSWindowDelegate
 
