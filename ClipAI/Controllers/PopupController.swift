@@ -30,10 +30,10 @@ class PopupController: NSWindowController {
     self.clipboardStore = clipboardStore
     self.generalSettingsViewModel = generalSettingsViewModel
 
-    // Create the window with proper styling
+    // Create the window with proper styling - completely borderless
     let window = PopupWindow(
       contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
-      styleMask: [.borderless],
+      styleMask: [],
       backing: .buffered,
       defer: false
     )
@@ -59,6 +59,7 @@ class PopupController: NSWindowController {
     window.level = .floating
     window.collectionBehavior = [.transient, .ignoresCycle, .moveToActiveSpace, .fullScreenAuxiliary]
 
+    
     // Allow window to become key for keyboard input
     window.canHide = false
 
