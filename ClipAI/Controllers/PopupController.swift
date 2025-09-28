@@ -145,6 +145,7 @@ class PopupController: NSWindowController {
       AppLog("PopupController: Using CGEvent method (accessibility enabled)", level: .debug, category: "Popup")
       sendPasteKeystrokeViaCGEvent()
     } else {
+      showAccessibilityPermissionAlert()
       AppLog("PopupController: no accessibility permission ", level: .debug, category: "Popup")
     }
   }
