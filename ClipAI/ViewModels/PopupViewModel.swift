@@ -10,6 +10,9 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
 
   private var keyboardMonitor: Any?
 
+  /// Reference to the popup window (weak to avoid retain cycle)
+  weak var popupWindow: NSWindow?
+
   @Published
   var selectedItemId: String?
 
@@ -329,8 +332,13 @@ extension PopupViewModel {
     stopKeyboardMonitoring() // Ensure we don't have multiple monitors
 
     keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { [weak self] event in
-      // Don't intercept keyboard events if a sheet or modal is open
-      if self?.isSheetOrModalPresented() == true {
+      guard let self = self else { return event }
+
+      // Only handle keyboard events if the popup window is the key window or is visible
+      // This prevents interference with other windows (like Settings with sheets)
+      guard let popupWindow = self.popupWindow,
+            popupWindow.isVisible,
+            (popupWindow.isKeyWindow || NSApp.keyWindow == nil) else {
         return event
       }
 
@@ -338,27 +346,11 @@ extension PopupViewModel {
       // Let other keys (letters, numbers, etc.) pass through to the search field
       let isNavigationKey = [125, 126, 36, 76, 53].contains(event.keyCode) // Down, Up, Return, Enter, Escape
 
-      if isNavigationKey, self?.handleKeyboardEvent(event) == true {
+      if isNavigationKey, self.handleKeyboardEvent(event) == true {
         return nil
       }
       return event
     }
-  }
-
-  /// Check if any sheet or modal window is currently presented
-  private func isSheetOrModalPresented() -> Bool {
-    // Check if any window has a sheet attached or is modal
-    for window in NSApp.windows {
-      // Check for attached sheets
-      if window.attachedSheet != nil {
-        return true
-      }
-      // Check for modal windows (windows at modalPanel level or above)
-      if window.level.rawValue >= NSWindow.Level.modalPanel.rawValue {
-        return true
-      }
-    }
-    return false
   }
 
   private func stopKeyboardMonitoring() {

@@ -78,6 +78,7 @@ class PopupController: NSWindowController {
 
     // Create the shared view model so the controller can interact with it directly
     let viewModel = PopupViewModel(clipboardStore: clipboardStore, generalSettingsViewModel: generalSettingsViewModel)
+    viewModel.popupWindow = window
     self.popupViewModel = viewModel
     self.popupViewModel?.itemSelectedHandler = {
       self.hidePopup()
