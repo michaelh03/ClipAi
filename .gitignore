@@ -64,5 +64,6 @@ fastlane/test_output
 
 
 dist/
+.DS_Store
 
 .cursor/
