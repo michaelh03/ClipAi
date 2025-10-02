@@ -9,16 +9,7 @@ ClipAI is a macOS menu bar application that provides intelligent clipboard histo
 ## Development Commands
 
 ### Building and Running
-```bash
-# Build the project
-xcodebuild -project ClipAI.xcodeproj -scheme ClipAI build
-
-# Run tests
-xcodebuild -project ClipAI.xcodeproj -scheme ClipAI test
-
-# Clean build
-xcodebuild -project ClipAI.xcodeproj -scheme ClipAI clean
-```
+Don't run the project, i will manually run it myself
 
 ### Available Targets
 - `ClipAI` - Main application target

@@ -1,1 +1,1 @@
-commit to git current files with a descriptive commit message
+commit to git current staged files with a descriptive commit message
