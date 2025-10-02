@@ -254,20 +254,20 @@ struct PromptsEditorView: View {
             }
             
             Spacer()
-            
+
             // Actions
-            if !prompt.isSystemPrompt {
-                VStack(spacing: 8) {
-                    Button(action: {
-                        viewModel.showEditPromptEditor(for: prompt)
-                    }) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 16))
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Edit prompt")
-                    
+            VStack(spacing: 8) {
+                Button(action: {
+                    viewModel.showEditPromptEditor(for: prompt)
+                }) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(.borderless)
+                .help("Edit prompt")
+
+                if !prompt.isSystemPrompt {
                     Button(action: {
                         Task {
                             await viewModel.deleteSystemPrompt(id: prompt.id)

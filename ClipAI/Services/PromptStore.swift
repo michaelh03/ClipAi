@@ -137,20 +137,35 @@ class PromptStore: ObservableObject {
     ///   - template: New template
     /// - Throws: PromptStoreError if update fails
     func updatePrompt(id: UUID, title: String, template: String) async throws {
-        guard let index = userPrompts.firstIndex(where: { $0.id == id }) else {
+        // Check if it's a user prompt first
+        if let index = userPrompts.firstIndex(where: { $0.id == id }) {
+            var updatedPrompt = userPrompts[index]
+            updatedPrompt.update(title: title, template: template)
+
+            guard updatedPrompt.isValid() else {
+                throw PromptStoreError.invalidPrompt("Title and template cannot be empty")
+            }
+
+            try await updatePromptInDatabase(updatedPrompt)
+            userPrompts[index] = updatedPrompt
+            updateCombinedPrompts()
+        }
+        // Check if it's a system prompt
+        else if let index = systemPrompts.firstIndex(where: { $0.id == id }) {
+            var updatedPrompt = systemPrompts[index]
+            updatedPrompt.update(title: title, template: template)
+
+            guard updatedPrompt.isValid() else {
+                throw PromptStoreError.invalidPrompt("Title and template cannot be empty")
+            }
+
+            try await updatePromptInDatabase(updatedPrompt)
+            systemPrompts[index] = updatedPrompt
+            updateCombinedPrompts()
+        }
+        else {
             throw PromptStoreError.promptNotFound("Prompt with ID \(id) not found")
         }
-        
-        var updatedPrompt = userPrompts[index]
-        updatedPrompt.update(title: title, template: template)
-        
-        guard updatedPrompt.isValid() else {
-            throw PromptStoreError.invalidPrompt("Title and template cannot be empty")
-        }
-        
-        try await updatePromptInDatabase(updatedPrompt)
-        userPrompts[index] = updatedPrompt
-        updateCombinedPrompts()
     }
     
     /// Delete a user prompt

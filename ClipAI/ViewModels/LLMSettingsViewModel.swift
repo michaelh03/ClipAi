@@ -381,12 +381,6 @@ class LLMSettingsViewModel: ObservableObject {
     
     /// Show the prompt editor for editing an existing prompt
     func showEditPromptEditor(for prompt: SystemPrompt) {
-        guard !prompt.isSystemPrompt else {
-            promptErrorMessage = "Cannot edit built-in system prompts"
-            clearPromptMessagesAfterDelay()
-            return
-        }
-        
         editingPrompt = prompt
         showingPromptEditor = true
         clearPromptMessages()

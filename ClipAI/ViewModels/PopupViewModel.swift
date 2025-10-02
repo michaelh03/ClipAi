@@ -329,6 +329,11 @@ extension PopupViewModel {
     stopKeyboardMonitoring() // Ensure we don't have multiple monitors
 
     keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { [weak self] event in
+      // Don't intercept keyboard events if a sheet or modal is open
+      if self?.isSheetOrModalPresented() == true {
+        return event
+      }
+
       // Only handle navigation keys when not typing in search field
       // Let other keys (letters, numbers, etc.) pass through to the search field
       let isNavigationKey = [125, 126, 36, 76, 53].contains(event.keyCode) // Down, Up, Return, Enter, Escape
@@ -338,6 +343,22 @@ extension PopupViewModel {
       }
       return event
     }
+  }
+
+  /// Check if any sheet or modal window is currently presented
+  private func isSheetOrModalPresented() -> Bool {
+    // Check if any window has a sheet attached or is modal
+    for window in NSApp.windows {
+      // Check for attached sheets
+      if window.attachedSheet != nil {
+        return true
+      }
+      // Check for modal windows (windows at modalPanel level or above)
+      if window.level.rawValue >= NSWindow.Level.modalPanel.rawValue {
+        return true
+      }
+    }
+    return false
   }
 
   private func stopKeyboardMonitoring() {
