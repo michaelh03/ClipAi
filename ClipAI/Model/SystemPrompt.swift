@@ -173,9 +173,9 @@ extension SystemPrompt {
         let baseDate = ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
 
         let promptConfigs: [(id: String, title: String, fileName: String)] = [
-            ("00000000-0000-0000-0000-000000000001", "Grammar & Spelling", "grammar_spelling"),
+            ("00000000-0000-0000-0000-000000000001", "Rewrite Assistant", "rewrite_helper"),
             ("00000000-0000-0000-0000-000000000002", "Code Review", "code_review"),
-            ("00000000-0000-0000-0000-000000000003", "Email Polish", "email_polish")
+            ("00000000-0000-0000-0000-000000000003", "JIRA Task", "jira_task")
         ]
 
         return promptConfigs.compactMap { config -> SystemPrompt? in

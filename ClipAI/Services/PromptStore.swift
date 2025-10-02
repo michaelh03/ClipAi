@@ -47,7 +47,7 @@ class PromptStore: ObservableObject {
             }
             
             let clipAIDirectory = applicationSupportURL.appendingPathComponent("ClipAI")
-            let databaseURL = clipAIDirectory.appendingPathComponent("promptsV9.sqlite")
+            let databaseURL = clipAIDirectory.appendingPathComponent("promptsV13.sqlite")
             
             // Create directory if it doesn't exist
             try FileManager.default.createDirectory(at: clipAIDirectory, 
