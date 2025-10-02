@@ -10,7 +10,10 @@ struct SystemPrompt: Codable, Identifiable, Equatable {
     
     /// Template string with placeholder support (e.g., {input})
     let template: String
-    
+
+    /// Optional file path for template loaded from external file
+    let templateFilePath: String?
+
     /// Whether this is a built-in system prompt (cannot be deleted)
     let isSystemPrompt: Bool
     
@@ -27,11 +30,13 @@ struct SystemPrompt: Codable, Identifiable, Equatable {
     ///   - id: Unique identifier (generates new UUID if nil)
     ///   - title: Human-readable title
     ///   - template: Template string with placeholder support
+    ///   - templateFilePath: Optional file path for external template
     ///   - isSystemPrompt: Whether this is a built-in prompt
-    init(id: UUID? = nil, title: String, template: String, isSystemPrompt: Bool = false) {
+    init(id: UUID? = nil, title: String, template: String, templateFilePath: String? = nil, isSystemPrompt: Bool = false) {
         self.id = id ?? UUID()
         self.title = title
         self.template = template
+        self.templateFilePath = templateFilePath
         self.isSystemPrompt = isSystemPrompt
         let now = Date()
         self.createdAt = now
@@ -43,13 +48,15 @@ struct SystemPrompt: Codable, Identifiable, Equatable {
     ///   - id: Unique identifier
     ///   - title: Human-readable title
     ///   - template: Template string with placeholder support
+    ///   - templateFilePath: Optional file path for external template
     ///   - isSystemPrompt: Whether this is a built-in prompt
     ///   - createdAt: Creation timestamp
     ///   - modifiedAt: Last modified timestamp
-    init(id: UUID, title: String, template: String, isSystemPrompt: Bool, createdAt: Date, modifiedAt: Date) {
+    init(id: UUID, title: String, template: String, templateFilePath: String? = nil, isSystemPrompt: Bool, createdAt: Date, modifiedAt: Date) {
         self.id = id
         self.title = title
         self.template = template
+        self.templateFilePath = templateFilePath
         self.isSystemPrompt = isSystemPrompt
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
@@ -118,14 +125,43 @@ struct SystemPrompt: Codable, Identifiable, Equatable {
     /// - Parameters:
     ///   - title: New title
     ///   - template: New template
-    mutating func update(title: String, template: String) {
+    ///   - templateFilePath: Optional file path for external template
+    mutating func update(title: String, template: String, templateFilePath: String? = nil) {
         self = SystemPrompt(
             id: self.id,
             title: title,
             template: template,
+            templateFilePath: templateFilePath,
             isSystemPrompt: self.isSystemPrompt
         )
         self.modifiedAt = Date()
+    }
+
+    // MARK: - File Loading
+
+    /// Load template from external file
+    /// - Parameter filePath: Path to the template file
+    /// - Returns: SystemPrompt with template loaded from file
+    /// - Throws: Error if file cannot be read
+    static func fromFile(id: UUID? = nil, title: String, filePath: String, isSystemPrompt: Bool = false) throws -> SystemPrompt {
+        let templateContent = try String(contentsOfFile: filePath, encoding: .utf8)
+        return SystemPrompt(
+            id: id,
+            title: title,
+            template: templateContent,
+            templateFilePath: filePath,
+            isSystemPrompt: isSystemPrompt
+        )
+    }
+
+    /// Get the effective template (from file if available, otherwise use stored template)
+    /// - Returns: Template content, loaded from file if path is set
+    /// - Throws: Error if file path is set but file cannot be read
+    func getEffectiveTemplate() throws -> String {
+        if let filePath = templateFilePath {
+            return try String(contentsOfFile: filePath, encoding: .utf8)
+        }
+        return template
     }
 }
 
@@ -133,30 +169,36 @@ struct SystemPrompt: Codable, Identifiable, Equatable {
 
 extension SystemPrompt {
     /// Default system prompts that come built-in with the app
-    static let defaultPrompts: [SystemPrompt] = [
-        SystemPrompt(
-            id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-            title: "Grammar & Spelling",
-            template: "Fix any grammar and spelling errors in the following text while preserving the original format, structure, tone, and meaning exactly as written.\n\n{input}\n\nOutput only the corrected text with no additional commentary.",
-            isSystemPrompt: true,
-            createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
-            modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
-        ),
-        SystemPrompt(
-            id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
-            title: "Code Review",
-            template: "Review the following code and provide concise feedback:\n\n{input}\n\nList key issues as short bullet points. Include bugs, security risks, performance problems, and maintainability concerns. If no issues found, respond \"No issues found.\"\n\nFormat: Brief bullet points only.",
-            isSystemPrompt: true,
-            createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
-            modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
-        ),
-        SystemPrompt(
-            id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
-            title: "Email Polish",
-            template: "Improve the following email content while preserving its core message and intent:\n\n{input}\n\nEnhance clarity, professionalism, and tone. Maintain the original structure unless it needs significant improvement. Output only the improved email content.",
-            isSystemPrompt: true,
-            createdAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!,
-            modifiedAt: ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
-        )
-    ]
+    static var defaultPrompts: [SystemPrompt] {
+        let baseDate = ISO8601DateFormatter().date(from: "2024-01-01T00:00:00Z")!
+
+        let promptConfigs: [(id: String, title: String, fileName: String)] = [
+            ("00000000-0000-0000-0000-000000000001", "Grammar & Spelling", "grammar_spelling"),
+            ("00000000-0000-0000-0000-000000000002", "Code Review", "code_review"),
+            ("00000000-0000-0000-0000-000000000003", "Email Polish", "email_polish")
+        ]
+
+        return promptConfigs.compactMap { config -> SystemPrompt? in
+            guard let filePath = Bundle.main.path(forResource: config.fileName, ofType: "txt") else {
+                AppLogger.shared.error("Failed to find prompt file: \(config.fileName)")
+                return nil
+            }
+
+            do {
+                let template = try String(contentsOfFile: filePath, encoding: .utf8)
+                return SystemPrompt(
+                    id: UUID(uuidString: config.id)!,
+                    title: config.title,
+                    template: template,
+                    templateFilePath: filePath,
+                    isSystemPrompt: true,
+                    createdAt: baseDate,
+                    modifiedAt: baseDate
+                )
+            } catch {
+              AppLogger.shared.error("Failed to load prompt from file: \(filePath), error: \(error.localizedDescription)")
+                return nil
+            }
+        }
+    }
 }

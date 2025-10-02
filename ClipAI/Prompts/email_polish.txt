@@ -1,0 +1,5 @@
+Improve the following email content while preserving its core message and intent:
+
+{input}
+
+Enhance clarity, professionalism, and tone. Maintain the original structure unless it needs significant improvement. Output only the improved email content.

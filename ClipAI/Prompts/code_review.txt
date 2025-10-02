@@ -1,0 +1,7 @@
+Review the following code and provide concise feedback:
+
+{input}
+
+List key issues as short bullet points. Include bugs, security risks, performance problems, and maintainability concerns. If no issues found, respond "No issues found."
+
+Format: Brief bullet points only.

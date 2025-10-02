@@ -1,0 +1,5 @@
+Fix any grammar and spelling errors in the following text while preserving the original format, structure, tone, and meaning exactly as written.
+
+{input}
+
+Output only the corrected text with no additional commentary.
