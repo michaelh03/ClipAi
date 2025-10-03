@@ -13,10 +13,9 @@ set -euo pipefail
 #
 # Notarization Requirements:
 # Before using --notarize, ensure you have:
-# 1. Valid Developer ID Application certificate installed in Keychain
+# 1. Valid Developer ID Application certificate installed in Keychain (used for signing both app and DMG)
 # 2. App-specific password for notarization stored in Keychain with label "notarization-password"
 #    Create with: xcrun notarytool store-credentials "notarization-password" --apple-id "your@email.com" --team-id "TEAMID"
-# 3. (Optional) Developer ID Installer certificate for DMG signing - if not found, DMG won't be signed
 #
 # Environment Variables (optional overrides):
 #   SCHEME=ClipAI
@@ -25,13 +24,12 @@ set -euo pipefail
 #   OUTPUT_DIR=/abs/path/to/dist
 #   CREATE_DMG_BIN=/create-dmg/create-dmg
 #   SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
-#   INSTALLER_IDENTITY="Developer ID Installer: Your Name (TEAMID)"
 #   KEYCHAIN_PROFILE="notarization-password"
 #   BUNDLE_ID="com.yourcompany.clipai"
 #
 # Notarization Process:
 # 1. Signs the app bundle with Developer ID Application certificate
-# 2. Creates and signs the DMG with Developer ID Installer certificate
+# 2. Creates and signs the DMG with Developer ID Application certificate
 # 3. Submits DMG to Apple for notarization
 # 4. Waits for notarization to complete
 # 5. Staples the notarization ticket to the DMG
@@ -65,7 +63,6 @@ CREATE_DMG_BIN="${CREATE_DMG_BIN:-}"
 
 # Notarization settings (only used when --notarize is specified)
 SIGNING_IDENTITY="${SIGNING_IDENTITY:-}"
-INSTALLER_IDENTITY="${INSTALLER_IDENTITY:-}"
 KEYCHAIN_PROFILE="${KEYCHAIN_PROFILE:-notarization-password}"
 BUNDLE_ID="${BUNDLE_ID:-com.yourcompany.clipai}"
 
@@ -107,25 +104,16 @@ fi
 if [[ "${NOTARIZE}" == "true" ]]; then
   echo "Validating notarization requirements..."
 
-  # Auto-detect signing identities if not provided
+  # Auto-detect signing identity if not provided
   if [[ -z "${SIGNING_IDENTITY}" ]]; then
     SIGNING_IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -n 1 | sed -n 's/.*"\(.*\)".*/\1/p' || true)
   fi
 
-  if [[ -z "${INSTALLER_IDENTITY}" ]]; then
-    INSTALLER_IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Installer" | head -n 1 | sed -n 's/.*"\(.*\)".*/\1/p' || true)
-  fi
-
-  # Validate signing identities
+  # Validate signing identity
   if [[ -z "${SIGNING_IDENTITY}" ]]; then
     echo "Error: No Developer ID Application certificate found." >&2
     echo "Please install a valid Developer ID Application certificate in your Keychain." >&2
     exit 1
-  fi
-
-  if [[ -z "${INSTALLER_IDENTITY}" ]]; then
-    echo "Warning: No Developer ID Installer certificate found." >&2
-    echo "DMG will be created but not signed. Install a Developer ID Installer certificate to sign the DMG." >&2
   fi
 
   # Validate keychain profile
@@ -138,11 +126,6 @@ if [[ "${NOTARIZE}" == "true" ]]; then
   fi
 
   echo "✓ Signing identity: ${SIGNING_IDENTITY}"
-  if [[ -n "${INSTALLER_IDENTITY}" ]]; then
-    echo "✓ Installer identity: ${INSTALLER_IDENTITY}"
-  else
-    echo "⚠ Installer identity: Not found (DMG won't be signed)"
-  fi
   echo "✓ Keychain profile: ${KEYCHAIN_PROFILE}"
 fi
 
@@ -247,17 +230,13 @@ rm -f "${DMG_PATH}"
 if [[ "${NOTARIZE}" == "true" ]]; then
   echo "[5/5] Signing and notarizing DMG…"
 
-  # Sign the DMG if installer identity is available
-  if [[ -n "${INSTALLER_IDENTITY}" ]]; then
-    echo "Signing DMG with ${INSTALLER_IDENTITY}…"
-    codesign --force --sign "${INSTALLER_IDENTITY}" "${DMG_PATH}"
+  # Sign the DMG with Application certificate (not Installer)
+  echo "Signing DMG with ${SIGNING_IDENTITY}…"
+  codesign --force --sign "${SIGNING_IDENTITY}" "${DMG_PATH}"
 
-    # Verify DMG signature
-    echo "Verifying DMG signature…"
-    codesign --verify --verbose "${DMG_PATH}"
-  else
-    echo "Skipping DMG signing (no Developer ID Installer certificate found)"
-  fi
+  # Verify DMG signature
+  echo "Verifying DMG signature…"
+  codesign --verify --verbose "${DMG_PATH}"
 
   # Submit for notarization
   echo "Submitting DMG for notarization…"
@@ -280,11 +259,7 @@ if [[ "${NOTARIZE}" == "true" ]]; then
     echo "Verifying stapled ticket…"
     xcrun stapler validate "${DMG_PATH}"
 
-    if [[ -n "${INSTALLER_IDENTITY}" ]]; then
-      echo "✓ DMG successfully signed, notarized, and stapled!"
-    else
-      echo "✓ DMG successfully notarized and stapled (not signed - no installer certificate)!"
-    fi
+    echo "✓ DMG successfully signed, notarized, and stapled!"
   else
     echo "✗ Notarization failed. Check the output above for details." >&2
     exit 1
