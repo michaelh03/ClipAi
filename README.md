@@ -17,7 +17,9 @@ Built as a side project with <a href="https://claude.ai/code">Claude Code</a>
   <a href="#"><img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg?style=flat-square" /></a>
 </p>
 
-**Your clipboard just got smarter.** ClipAI remembers everything you copy and lets you send it to AI with one click—no more breaking your flow switching to ChatGPT and back. Review code, generate tickets, polish writing, all from your menu bar. Stay in your flow state.
+**Your clipboard just got smarter.** 
+
+ClipAI remembers everything you copy and lets you send it to AI with one click no more breaking your flow switching to ChatGPT and back. Review code, generate tickets, polish writing, all from your menu bar. Stay in your flow state.
 
 <p align="center">
   <img src="assets/demoVideo.gif" alt="ClipAI Demo" width="80%" />
@@ -37,7 +39,6 @@ Built as a side project with <a href="https://claude.ai/code">Claude Code</a>
 - **Built-in Prompt Templates** - Code review, JIRA ticket generation, and text rewriting
 - **Global Hotkeys** - Quick access to clipboard history and AI actions
 - **Syntax Highlighting** - Automatic code detection and beautiful syntax highlighting
-- **Secure** - Your API keys are stored securely in the macOS Keychain
 
 ## Documentation
 
