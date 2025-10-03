@@ -17,7 +17,7 @@ Built as a side project with <a href="https://claude.ai/code">Claude Code</a>
   <a href="#"><img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg?style=flat-square" /></a>
 </p>
 
-ClipAI is a powerful macOS menu bar application that combines intelligent clipboard history management with AI processing capabilities. Never lose your clipboard history again, and enhance your copied content with AI-powered transformations.
+**Your clipboard just got smarter.** ClipAI remembers everything you copy and lets you send it to AI with one click—no more breaking your flow switching to ChatGPT and back. Review code, generate tickets, polish writing, all from your menu bar. Stay in your flow state.
 
 <p align="center">
   <img src="assets/demoVideo.gif" alt="ClipAI Demo" width="80%" />
@@ -48,9 +48,17 @@ ClipAI is a powerful macOS menu bar application that combines intelligent clipbo
 
 ## Installation
 
+### Homebrew (Recommended)
+
+```bash
+brew install --cask michaelh03/clipai/clipai
+```
+
+### Manual Download
+
 Download the latest release from the [releases page](https://github.com/michaelhsoft/ClipAI/releases).
 
-Or build from source:
+### Build from Source
 
 ```bash
 git clone https://github.com/michaelhsoft/ClipAI.git
