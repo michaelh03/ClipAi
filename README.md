@@ -29,6 +29,10 @@ ClipAI remembers everything you copy and lets you send it to AI with one click n
 <em>Search, preview, and AI-enhance your clipboard history</em>
 </p>
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="ClipAI Interface" width="80%" />
+</p>
+
 ## Features
 
 - **Smart Clipboard History** - Store and search through your clipboard history with an intuitive interface
