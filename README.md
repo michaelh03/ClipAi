@@ -17,20 +17,20 @@ Built as a side project with <a href="https://claude.ai/code">Claude Code</a>
   <a href="#"><img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg?style=flat-square" /></a>
 </p>
 
-**Your clipboard just got smarter.** 
+**Your clipboard just got smarter.**
 
 ClipAI remembers everything you copy and lets you send it to AI with one click no more breaking your flow switching to ChatGPT and back. Review code, generate tickets, polish writing, all from your menu bar. Stay in your flow state.
 
 <p align="center">
-  <img src="assets/demoVideo.gif" alt="ClipAI Demo" width="80%" />
-</p>
-
-<p align="center">
-<em>Search, preview, and AI-enhance your clipboard history</em>
-</p>
-
-<p align="center">
   <img src="assets/screenshot.png" alt="ClipAI Interface" width="80%" />
+</p>
+
+<p align="center">
+<em>Demo of the one-click AI feature</em>
+</p>
+
+<p align="center">
+  <img src="assets/demoVideo.gif" alt="ClipAI Demo" width="80%" />
 </p>
 
 ## Features
