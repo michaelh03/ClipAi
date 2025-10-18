@@ -40,14 +40,9 @@ struct LLMSettingsView: View {
                         view: { AnyView(aiModelsTab) }
                     ),
                     (
-                        title: "Prompts", 
+                        title: "Prompts",
                         icon: "text.bubble",
                         view: { AnyView(systemPromptsTab) }
-                    ),
-                    (
-                        title: "Logs",
-                        icon: "doc.text.magnifyingglass",
-                        view: { AnyView(logsTab) }
                     )
                 ]
             )
@@ -91,10 +86,6 @@ struct LLMSettingsView: View {
         GeneralSettingsView(viewModel: viewModel.generalSettingsViewModel)
     }
 
-    private var logsTab: some View {
-        LogsView()
-    }
-    
     // MARK: - View Components
     
     private var headerView: some View {
