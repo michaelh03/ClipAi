@@ -4,16 +4,24 @@ import Foundation
 struct ClipItem: Identifiable, Codable, Equatable {
     /// Unique identifier for the clipboard item
     let id: String
-    
+
     /// The actual clipboard content (text)
     let content: String
-    
+
     /// When this item was added to the clipboard
     let timestamp: Date
-    
+
     /// Metadata dictionary for storing additional information about the clip item
     let metadata: [String: String]
-    
+
+    /// Preview text (first 100 characters) for UI display and content type detection
+    /// This is computed once at initialization to avoid performance issues with large content
+    let preview: String
+
+    /// Content type detected from preview text (computed once at initialization)
+    /// Uses preview instead of full content for performance
+    let contentType: ClipContentType
+
     /// Initialize a new clipboard item with the given content
     /// - Parameters:
     ///   - content: The clipboard text content
@@ -23,6 +31,18 @@ struct ClipItem: Identifiable, Codable, Equatable {
         self.content = content
         self.timestamp = Date()
         self.metadata = metadata
+
+        // Compute preview once at initialization (first 100 chars)
+        let maxLength = 100
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedContent.count <= maxLength {
+            self.preview = trimmedContent
+        } else {
+            self.preview = String(trimmedContent.prefix(maxLength)) + "..."
+        }
+
+        // Detect content type from preview for performance (not full content)
+        self.contentType = ClipContentType.detect(from: self.preview)
     }
     
     /// Initialize a clipboard item with all properties (used for decoding)
@@ -36,22 +56,23 @@ struct ClipItem: Identifiable, Codable, Equatable {
         self.content = content
         self.timestamp = timestamp
         self.metadata = metadata
+
+        // Compute preview once at initialization (first 100 chars)
+        let maxLength = 100
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedContent.count <= maxLength {
+            self.preview = trimmedContent
+        } else {
+            self.preview = String(trimmedContent.prefix(maxLength)) + "..."
+        }
+
+        // Detect content type from preview for performance (not full content)
+        self.contentType = ClipContentType.detect(from: self.preview)
     }
 }
 
 // MARK: - Computed Properties
 extension ClipItem {
-    /// A preview of the content limited to the first few characters
-    var preview: String {
-        let maxLength = 80
-        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedContent.count <= maxLength {
-            return trimmedContent
-        } else {
-            return String(trimmedContent.prefix(maxLength)) + "..."
-        }
-    }
-    
     /// Formatted timestamp string for display
     var formattedTimestamp: String {
         let formatter = DateFormatter()
@@ -87,12 +108,7 @@ extension ClipItem {
             return formattedTimestamp // Fallback: short date (mm/dd/yy)
         }
     }
-    
-    /// Automatically detected content type based on the clipboard content
-    var contentType: ClipContentType {
-        return ClipContentType.detect(from: content)
-    }
-    
+
     /// The preview provider that should handle this clip item
     /// This is a computed property that uses the registry to find the best provider
     var previewProvider: (any ClipItemPreviewProvider)? {

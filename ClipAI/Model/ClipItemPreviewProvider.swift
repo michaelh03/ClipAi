@@ -235,8 +235,9 @@ struct ColorPreviewProvider: ClipItemPreviewProvider {
     let priority: Int = 80 // High priority for color content
     
     func canPreview(_ item: ClipItem) -> Bool {
-        // Check if content type is color or if content matches color patterns
-        return item.contentType == .color || ClipContentType.color.hasColorPatterns(item.content)
+        // Check if content type is color (detected from preview at init)
+        // No need to re-check patterns on full content for performance
+        return item.contentType == .color
     }
     
     func createPreview(for item: ClipItem, generalSettingsViewModel: GeneralSettingsViewModel) -> AnyView {
@@ -250,18 +251,11 @@ struct ColorPreviewProvider: ClipItemPreviewProvider {
 struct CodePreviewProvider: ClipItemPreviewProvider {
     let supportedContentType: ClipContentType = .code
     let priority: Int = 75 // High priority for code content
-    
-    /// Code detector instance for enhanced detection
-    private let codeDetector = CodeDetector()
-    
+
     func canPreview(_ item: ClipItem) -> Bool {
-        // Check if content type is code or if content has code characteristics
-        if item.contentType == .code {
-            return true
-        }
-        
-        // Also check with code detector for better accuracy
-        return codeDetector.isCode(item.content)
+        // Check if content type is code (detected from preview at init)
+        // No need to re-run detector on full content for performance
+        return item.contentType == .code
     }
     
     func createPreview(for item: ClipItem, generalSettingsViewModel: GeneralSettingsViewModel) -> AnyView {
@@ -278,7 +272,8 @@ struct BasicTextPreviewProvider: ClipItemPreviewProvider {
     
     func canPreview(_ item: ClipItem) -> Bool {
         // Can preview any text content as fallback
-        return !item.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        // Use preview instead of full content for performance
+        return !item.preview.isEmpty
     }
     
     func createPreview(for item: ClipItem, generalSettingsViewModel: GeneralSettingsViewModel) -> AnyView {

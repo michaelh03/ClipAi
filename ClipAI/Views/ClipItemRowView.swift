@@ -64,12 +64,13 @@ struct ClipItemRowView: View {
     }
 
     /// Get content type for better UI styling
+    /// Uses preview text for performance - no need to check full content for UI display
     private var contentType: ContentType {
-        if clipItem.content.hasPrefix("http://") || clipItem.content.hasPrefix("https://") {
+        if clipItem.preview.hasPrefix("http://") || clipItem.preview.hasPrefix("https://") {
             return .url
-        } else if clipItem.content.contains("\n") && clipItem.content.count > 100 {
+        } else if clipItem.preview.contains("\n") && clipItem.preview.count > 50 {
             return .multiline
-        } else if clipItem.content.count > 100 {
+        } else if clipItem.preview.count > 50 {
             return .longText
         } else {
             return .text
@@ -77,12 +78,13 @@ struct ClipItemRowView: View {
     }
 
     /// Get preview text with better formatting
+    /// Uses preview text for performance - sufficient for UI display
     private var formattedPreview: String {
         switch contentType {
         case .url:
-            return clipItem.content
+            return clipItem.preview
         case .multiline:
-            return clipItem.content.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? clipItem.preview
+            return clipItem.preview.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? clipItem.preview
         default:
             return clipItem.preview
         }
@@ -130,15 +132,15 @@ struct ClipItemRowView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "text.alignleft")
                                     .font(.system(size: 10, weight: .medium))
-                                Text("\(clipItem.content.components(separatedBy: .newlines).count) lines")
+                                Text("\(clipItem.preview.components(separatedBy: .newlines).count)+ lines")
                                     .font(.system(.caption, weight: .medium))
                             }
                             .foregroundColor(.secondary)
-                        } else if clipItem.content.count > 50 {
+                        } else if clipItem.preview.count > 50 {
                             HStack(spacing: 4) {
                                 Image(systemName: "textformat.size")
                                     .font(.system(size: 10, weight: .medium))
-                                Text("\(clipItem.content.count) chars")
+                                Text("100+ chars")
                                     .font(.system(.caption, weight: .medium))
                             }
                             .foregroundColor(.secondary)
