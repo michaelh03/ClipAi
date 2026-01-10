@@ -626,6 +626,12 @@ class LLMSettingsViewModel: ObservableObject {
             }
         case "gemini":
             switch modelId {
+            case "gemini-3.0", "gemini-3-pro-preview":
+                return "Latest generation Gemini 3 Pro preview model"
+            case "gemini-3.0-flash", "gemini-3-flash-preview":
+                return "Fast Gemini 3 Flash preview model for low-latency responses"
+            case "gemini-3-pro-image-preview":
+                return "Gemini 3 Pro preview optimized for image generation"
             case "gemini-2.5-pro":
                 return "Google's most advanced model with 2M token context"
             case "gemini-2.5-flash":
