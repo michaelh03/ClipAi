@@ -160,6 +160,9 @@ class GeminiProvider: LLMProvider {
     
     func availableModels() -> [String] {
         return [
+            "gemini-3-pro-preview",
+            "gemini-3-flash-preview",
+            "gemini-3-pro-image-preview",
             "gemini-2.5-pro",
             "gemini-2.5-flash",
             "gemini-2.5-flash-lite",
@@ -179,6 +182,16 @@ class GeminiProvider: LLMProvider {
         
         // Map common model strings to Gemini model names
         switch modelString.lowercased() {
+        case "gemini-3.0":
+            return "gemini-3-pro-preview"
+        case "gemini-3.0-flash":
+            return "gemini-3-flash-preview"
+        case "gemini-3-pro-preview":
+            return "gemini-3-pro-preview"
+        case "gemini-3-flash-preview":
+            return "gemini-3-flash-preview"
+        case "gemini-3-pro-image-preview":
+            return "gemini-3-pro-image-preview"
         case "gemini-2.5-pro":
             return "gemini-2.5-pro"
         case "gemini-2.5-flash":
@@ -283,6 +296,8 @@ class GeminiProvider: LLMProvider {
     /// - Returns: Maximum context length in tokens
     private func getMaxTokensForModel(_ model: String) -> Int {
         switch model {
+        case "gemini-3.0", "gemini-3.0-flash", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-image-preview":
+            return 1048576  // Safe default for new models
         case "gemini-2.5-pro":
             return 2097152  // 2M tokens
         case "gemini-2.5-flash":
@@ -305,6 +320,12 @@ extension GeminiProvider {
     /// - Returns: Display name for the model
     static func displayName(for model: String) -> String {
         switch model {
+        case "gemini-3.0", "gemini-3-pro-preview":
+            return "Gemini 3 Pro Preview"
+        case "gemini-3.0-flash", "gemini-3-flash-preview":
+            return "Gemini 3 Flash Preview"
+        case "gemini-3-pro-image-preview":
+            return "Gemini 3 Pro Image Preview"
         case "gemini-2.5-pro":
             return "Gemini 2.5 Pro"
         case "gemini-2.5-flash":
@@ -323,7 +344,7 @@ extension GeminiProvider {
     /// - Returns: true if the model supports vision
     static func supportsVision(model: String) -> Bool {
         switch model {
-        case "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash":
+        case "gemini-3.0", "gemini-3.0-flash", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-image-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash":
             return true
         default:
             return false
@@ -335,6 +356,8 @@ extension GeminiProvider {
     /// - Returns: Maximum context length in tokens
     static func maxContextLength(for model: String) -> Int {
         switch model {
+        case "gemini-3.0", "gemini-3.0-flash", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-image-preview":
+            return 1048576  // Safe default for new models
         case "gemini-2.5-pro":
             return 2097152  // 2M tokens
         case "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash":
@@ -349,7 +372,7 @@ extension GeminiProvider {
     /// - Returns: true if the model supports function calling
     static func supportsFunctionCalling(model: String) -> Bool {
         switch model {
-        case "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash":
+        case "gemini-3.0", "gemini-3.0-flash", "gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-image-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash":
             return true
         default:
             return true  // Most newer models support function calling
