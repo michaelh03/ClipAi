@@ -75,7 +75,7 @@ struct ClipboardListView: View {
       .focused(isListFocused)
       .onChange(of: viewModel.selectedItemId) { _, selectedId in
         // Auto-scroll to selected item with smooth animation (disabled for initial selection)
-        if let selectedId = selectedId {
+        if let selectedId = selectedId, viewModel.shouldAutoScrollSelection() {
           if viewModel.isInitialSelection {
             // No animation for initial selection
             proxy.scrollTo(selectedId, anchor: .center)
