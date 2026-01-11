@@ -23,7 +23,7 @@ class LLMProviderRegistry {
     private var providers: [String: LLMProvider] = [:]
     
     /// Array of provider IDs in preferred order for default selection
-    private let providerPriority: [String] = ["openai", "gemini", "claude"]
+    private let providerPriority: [String] = ["openai", "gemini", "custom", "claude"]
 
     /// UserDefaults key for storing user-selected default provider
     private let defaultProviderIdKey: String = "defaultProviderId"
@@ -101,9 +101,9 @@ class LLMProviderRegistry {
         guard hasAPIKey(for: providerId) else {
             return false
         }
-        
-        // Get or create provider instance
-        guard let provider = await getOrCreateProvider(id: providerId) else {
+
+        let selectedModel = getSelectedModel(for: providerId)
+        guard let provider = await getProviderForModel(providerId: providerId, modelId: selectedModel) else {
             return false
         }
         
@@ -154,8 +154,9 @@ class LLMProviderRegistry {
         guard let defaultId = await getDefaultProviderId() else {
             return nil
         }
-        
-        return await getOrCreateProvider(id: defaultId)
+
+        let selectedModel = getSelectedModel(for: defaultId)
+        return await getProviderForModel(providerId: defaultId, modelId: selectedModel)
     }
 
     /// Persist the user-selected default provider ID (set to nil to clear)
@@ -173,6 +174,9 @@ class LLMProviderRegistry {
     /// - Parameter providerId: The provider ID
     /// - Returns: Array of model identifiers, empty if provider not available
     func getAvailableModels(for providerId: String) async -> [String] {
+        if providerId == "custom" {
+            return CustomModelStore.models(for: providerId).map { $0.modelId }
+        }
         guard let provider = await getOrCreateProvider(id: providerId) else {
             return []
         }
@@ -199,17 +203,24 @@ class LLMProviderRegistry {
     /// - Parameter providerId: The provider ID
     /// - Returns: True if API key exists in UserDefaults
     private func hasAPIKey(for providerId: String) -> Bool {
+        return getAPIKeyValue(for: providerId) != nil
+    }
+
+    private func getAPIKeyValue(for providerId: String) -> String? {
         let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
         if let key = apiKeys[providerId]?.trimmingCharacters(in: .whitespacesAndNewlines), !key.isEmpty {
-            return true
+            return key
         }
-        return false
+        return nil
     }
     
     /// Get or create a provider instance with API key from keychain
     /// - Parameter id: The provider ID
     /// - Returns: Provider instance if successful, nil otherwise
     private func getOrCreateProvider(id: String) async -> LLMProvider? {
+        if id == "custom" {
+            return nil
+        }
         // Return existing provider if already created
         if let existingProvider = providers[id] {
             return existingProvider
@@ -217,8 +228,7 @@ class LLMProviderRegistry {
         
         // Try to create new provider instance with API key from UserDefaults
         do {
-            let apiKeys = UserDefaults.standard.dictionary(forKey: apiKeysDefaultsKey) as? [String: String] ?? [:]
-            guard let apiKey = apiKeys[id]?.trimmingCharacters(in: .whitespacesAndNewlines), !apiKey.isEmpty else {
+            guard let apiKey = getAPIKeyValue(for: id) else {
                 return nil
             }
             let provider = try createProvider(id: id, apiKey: apiKey)
@@ -235,12 +245,20 @@ class LLMProviderRegistry {
     ///   - apiKey: The API key for the provider
     /// - Returns: Provider instance
     /// - Throws: LLMError if provider ID is not supported
-    private func createProvider(id: String, apiKey: String) throws -> LLMProvider {
+    private func createProvider(
+        id: String,
+        apiKey: String
+    ) throws -> LLMProvider {
         switch id {
         case "openai":
             return MacPawOpenAIProvider(apiKey: apiKey)
         case "gemini":
             return GeminiProvider(apiKey: apiKey)
+        case "custom":
+            throw LLMError.invalidResponse(
+                provider: id,
+                details: "Custom provider requires a model-specific configuration"
+            )
         case "claude":
             // TODO: Implement ClaudeProvider when available
             throw LLMError.serviceUnavailable(provider: id)
@@ -255,7 +273,28 @@ class LLMProviderRegistry {
     /// Get all known provider IDs (including those not yet implemented)
     /// - Returns: Array of all known provider IDs
     private func getAllKnownProviderIds() -> [String] {
-        return ["openai", "gemini", "claude"]
+        return ["openai", "gemini", "custom", "claude"]
+    }
+
+    private func getProviderForModel(providerId: String, modelId: String?) async -> LLMProvider? {
+        guard let apiKey = getAPIKeyValue(for: providerId) else {
+            return nil
+        }
+        if providerId == "custom" {
+            guard let modelId = modelId,
+                  let model = CustomModelStore.find(providerId: providerId, modelId: modelId) else {
+                return nil
+            }
+            return CustomAPIProvider(
+                configuration: .init(
+                    apiKey: apiKey,
+                    modelId: model.modelId,
+                    endpointURL: model.endpointURL,
+                    additionalConfigJSON: model.additionalConfigJSON
+                )
+            )
+        }
+        return await getOrCreateProvider(id: providerId)
     }
     
     // MARK: - Provider Management
@@ -304,12 +343,14 @@ extension LLMProviderRegistry {
         systemPrompt: String? = nil,
         model: String? = nil
     ) async throws -> String {
-        guard let defaultProviderId = await getDefaultProviderId(),
-              let provider = await getDefaultProvider() else {
+        guard let defaultProviderId = await getDefaultProviderId() else {
             throw LLMError.serviceUnavailable(provider: "Registry")
         }
-        
+
         let selectedModel = model ?? getSelectedModel(for: defaultProviderId)
+        guard let provider = await getProviderForModel(providerId: defaultProviderId, modelId: selectedModel) else {
+            throw LLMError.serviceUnavailable(provider: "Registry")
+        }
         
         return try await provider.send(
             prompt: prompt,
@@ -332,11 +373,10 @@ extension LLMProviderRegistry {
         systemPrompt: String? = nil,
         model: String? = nil
     ) async throws -> String {
-        guard let provider = await getOrCreateProvider(id: providerId) else {
+        let selectedModel = model ?? getSelectedModel(for: providerId)
+        guard let provider = await getProviderForModel(providerId: providerId, modelId: selectedModel) else {
             throw LLMError.serviceUnavailable(provider: providerId)
         }
-        
-        let selectedModel = model ?? getSelectedModel(for: providerId)
         
         return try await provider.send(
             prompt: prompt,

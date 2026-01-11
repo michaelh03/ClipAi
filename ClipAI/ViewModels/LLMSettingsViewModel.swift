@@ -55,6 +55,9 @@ class LLMSettingsViewModel: ObservableObject {
     
     /// Selected models for all providers
     @Published var providerSelectedModels: [String: String] = [:]
+
+    /// Custom models for the selected provider
+    @Published var customModelsForSelectedProvider: [CustomModelDefinition] = []
     
     // MARK: - System Prompts Properties
     
@@ -202,8 +205,27 @@ class LLMSettingsViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            // Create a temporary provider instance to test the key
-            let provider = try createTempProvider(id: selectedProvider.id, apiKey: apiKeyInput)
+            let provider: LLMProvider
+            if selectedProvider.id == "custom" {
+                guard let selectedModel = selectedModel,
+                      let customModel = CustomModelStore.find(providerId: selectedProvider.id, modelId: selectedModel.id) else {
+                    apiKeyIsValid = false
+                    validationError = "API key test failed"
+                    errorMessage = "Select a custom model with a valid endpoint first"
+                    isValidating = false
+                    return
+                }
+                provider = CustomAPIProvider(
+                    configuration: .init(
+                        apiKey: apiKeyInput,
+                        modelId: customModel.modelId,
+                        endpointURL: customModel.endpointURL
+                    )
+                )
+            } else {
+                // Create a temporary provider instance to test the key
+                provider = try createTempProvider(id: selectedProvider.id, apiKey: apiKeyInput)
+            }
             let isConfigured = await provider.isConfigured()
             
             if isConfigured {
@@ -307,17 +329,34 @@ class LLMSettingsViewModel: ObservableObject {
     /// Load available models for the currently selected provider
     func loadAvailableModelsForSelectedProvider() {
         do {
-            let provider = try createTempProvider(id: selectedProvider.id, apiKey: "dummy-key")
-            let models = provider.availableModels()
-            
-            availableModels = models.map { modelId in
+            let customModels = selectedProvider.id == "custom" ? CustomModelStore.models(for: selectedProvider.id) : []
+            customModelsForSelectedProvider = customModels
+            let customModelInfos = customModels.map { model in
                 ModelInfo(
-                    id: modelId,
-                    displayName: getDisplayName(for: modelId, providerId: selectedProvider.id),
-                    description: getModelDescription(for: modelId, providerId: selectedProvider.id),
-                    maxTokens: getMaxTokens(for: modelId, providerId: selectedProvider.id),
-                    capabilities: getModelCapabilities(for: modelId, providerId: selectedProvider.id)
+                    id: model.modelId,
+                    displayName: model.modelId,
+                    description: "Custom endpoint: \(model.endpointURL)",
+                    maxTokens: nil,
+                    capabilities: ["Custom Endpoint", "Text Generation"]
                 )
+            }
+
+            if selectedProvider.id == "custom" {
+                availableModels = customModelInfos
+            } else {
+                let provider = try createTempProvider(id: selectedProvider.id, apiKey: "dummy-key")
+                let models = provider.availableModels()
+                let builtInModels = models
+
+                availableModels = builtInModels.map { modelId in
+                    ModelInfo(
+                        id: modelId,
+                        displayName: getDisplayName(for: modelId, providerId: selectedProvider.id),
+                        description: getModelDescription(for: modelId, providerId: selectedProvider.id),
+                        maxTokens: getMaxTokens(for: modelId, providerId: selectedProvider.id),
+                        capabilities: getModelCapabilities(for: modelId, providerId: selectedProvider.id)
+                    )
+                }
             }
             
             // Set the selected model for this provider
@@ -328,11 +367,16 @@ class LLMSettingsViewModel: ObservableObject {
                 selectedModel = firstModel
                 providerSelectedModels[selectedProvider.id] = firstModel.id
                 saveSelectedModels()
+            } else {
+                selectedModel = nil
+                providerSelectedModels.removeValue(forKey: selectedProvider.id)
+                saveSelectedModels()
             }
             
         } catch {
             availableModels = []
             selectedModel = nil
+            customModelsForSelectedProvider = []
         }
     }
     
@@ -357,6 +401,70 @@ class LLMSettingsViewModel: ObservableObject {
     /// Get the selected model ID for a provider
     func getSelectedModel(for providerId: String) -> String? {
         return providerSelectedModels[providerId]
+    }
+
+    /// Whether the selected provider supports custom endpoints
+    var supportsCustomModelEndpoints: Bool {
+        return selectedProvider.id == "custom"
+    }
+
+    /// Add a custom model with a custom endpoint URL
+    /// - Returns: Error message if validation fails, otherwise nil
+    func addCustomModel(modelId: String, endpointURL: String, additionalConfigJSON: String) -> String? {
+        guard supportsCustomModelEndpoints else {
+            return "Custom models are only supported for the Custom provider"
+        }
+        let trimmedModelId = modelId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEndpoint = endpointURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedConfig = additionalConfigJSON.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedModelId.isEmpty else {
+            return "Model ID is required"
+        }
+        guard !trimmedEndpoint.isEmpty else {
+            return "Endpoint URL is required"
+        }
+        guard CustomModelStore.parseEndpointURL(trimmedEndpoint) != nil else {
+            return "Enter a valid endpoint URL (include https://)"
+        }
+        if !trimmedConfig.isEmpty {
+            guard let data = trimmedConfig.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data),
+                  json is [String: Any] else {
+                return "Additional config must be a JSON object"
+            }
+        }
+
+        if CustomModelStore.find(providerId: selectedProvider.id, modelId: trimmedModelId) != nil {
+            return "Custom model already exists"
+        }
+
+        let model = CustomModelDefinition(
+            providerId: selectedProvider.id,
+            modelId: trimmedModelId,
+            endpointURL: trimmedEndpoint,
+            additionalConfigJSON: trimmedConfig.isEmpty ? nil : trimmedConfig,
+            createdAt: Date()
+        )
+        CustomModelStore.upsert(model)
+        loadAvailableModelsForSelectedProvider()
+
+        if let addedModel = availableModels.first(where: { $0.id == trimmedModelId }) {
+            selectedModel = addedModel
+            saveSelectedModel()
+        }
+
+        return nil
+    }
+
+    /// Remove a custom model for the selected provider
+    func removeCustomModel(modelId: String) {
+        CustomModelStore.remove(providerId: selectedProvider.id, modelId: modelId)
+        loadAvailableModelsForSelectedProvider()
+        if availableModels.isEmpty {
+            selectedModel = nil
+            providerSelectedModels.removeValue(forKey: selectedProvider.id)
+            saveSelectedModels()
+        }
     }
     
     // MARK: - System Prompts Management
@@ -561,6 +669,13 @@ class LLMSettingsViewModel: ObservableObject {
                 description: "Access to Gemini Pro models from Google AI",
                 keyFormat: "AI...  (starts with 'AI')",
                 websiteURL: "https://makersuite.google.com/app/apikey"
+            ),
+            ProviderInfo(
+                id: "custom",
+                displayName: "Custom",
+                description: "Connect to any OpenAI-compatible endpoint you control",
+                keyFormat: "Any bearer token supported by your endpoint",
+                websiteURL: ""
             )
             // ProviderInfo(
             //     id: "claude",
@@ -691,6 +806,8 @@ class LLMSettingsViewModel: ObservableObject {
             return trimmedKey.hasPrefix("AI")
         case "claude":
             return trimmedKey.hasPrefix("sk-ant-")
+        case "custom":
+            return !trimmedKey.isEmpty
         default:
             return !trimmedKey.isEmpty
         }
