@@ -78,6 +78,9 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
   @Published
   var filteredItems: [ClipItem] = []
 
+  /// Prevent auto-scroll when selection changes due to hover.
+  private var suppressAutoScrollForNextSelection: Bool = false
+
   /// Update filtered items based on current search text
   private func updateFilteredItems() {
     let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -272,7 +275,17 @@ class PopupViewModel: ObservableObject, ClipboardStoreDelegate {
 
   /// Handle item hover for selection
   func handleItemHovered(_ item: ClipItem) {
+    suppressAutoScrollForNextSelection = true
     selectedItemId = item.id
+  }
+
+  /// Returns whether the list should auto-scroll to the current selection.
+  func shouldAutoScrollSelection() -> Bool {
+    if suppressAutoScrollForNextSelection {
+      suppressAutoScrollForNextSelection = false
+      return false
+    }
+    return true
   }
 
   // MARK: - Clipboard Operations Coordination
