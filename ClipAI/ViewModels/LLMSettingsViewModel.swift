@@ -607,6 +607,18 @@ class LLMSettingsViewModel: ObservableObject {
         switch providerId {
         case "openai":
             switch modelId {
+            case "gpt-5.5":
+                return "Latest flagship GPT-5.5 for coding and professional work"
+            case "gpt-5.5-pro":
+                return "GPT-5.5 Pro for smarter, more precise responses"
+            case "gpt-5.4":
+                return "Affordable GPT-5.4 for coding and professional work"
+            case "gpt-5.4-pro":
+                return "GPT-5.4 Pro for smarter, more precise responses"
+            case "gpt-5.4-mini":
+                return "Strongest mini model for coding, computer use, and subagents"
+            case "gpt-5.4-nano":
+                return "Cheapest GPT-5.4-class model for simple high-volume tasks"
             case "gpt-5":
                 return "Latest flagship GPT-5 with advanced reasoning"
             case "gpt-5-mini":
@@ -626,6 +638,12 @@ class LLMSettingsViewModel: ObservableObject {
             }
         case "gemini":
             switch modelId {
+            case "gemini-3.1-pro-preview":
+                return "Most intelligent Gemini model with state-of-the-art reasoning"
+            case "gemini-3.5-flash":
+                return "Frontier-class performance at a fraction of the cost"
+            case "gemini-3.1-flash-lite":
+                return "High-volume, cost-sensitive model with Gemini 3 quality"
             case "gemini-3.0", "gemini-3-pro-preview":
                 return "Latest generation Gemini 3 Pro preview model"
             case "gemini-3.0-flash", "gemini-3-flash-preview":
