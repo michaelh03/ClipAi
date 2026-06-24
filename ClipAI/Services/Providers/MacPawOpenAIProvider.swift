@@ -173,6 +173,12 @@ class MacPawOpenAIProvider: LLMProvider {
     
     func availableModels() -> [String] {
         return [
+          "gpt-5.5",
+          "gpt-5.5-pro",
+          "gpt-5.4",
+          "gpt-5.4-pro",
+          "gpt-5.4-mini",
+          "gpt-5.4-nano",
           Model.gpt5,
           Model.gpt5_mini,
           Model.gpt5_nano,
@@ -206,6 +212,18 @@ class MacPawOpenAIProvider: LLMProvider {
         
         // Map common model strings to Model enum
         switch modelString.lowercased() {
+        case "gpt-5.5":
+            return "gpt-5.5"
+        case "gpt-5.5-pro":
+            return "gpt-5.5-pro"
+        case "gpt-5.4":
+            return "gpt-5.4"
+        case "gpt-5.4-pro":
+            return "gpt-5.4-pro"
+        case "gpt-5.4-mini":
+            return "gpt-5.4-mini"
+        case "gpt-5.4-nano":
+            return "gpt-5.4-nano"
         case "gpt-5":
             return Model.gpt5
         case "gpt-5-mini":
@@ -280,6 +298,18 @@ extension MacPawOpenAIProvider {
     /// - Returns: Display name for the model
     static func displayName(for model: Model) -> String {
         switch model {
+        case "gpt-5.5":
+            return "GPT-5.5"
+        case "gpt-5.5-pro":
+            return "GPT-5.5 Pro"
+        case "gpt-5.4":
+            return "GPT-5.4"
+        case "gpt-5.4-pro":
+            return "GPT-5.4 Pro"
+        case "gpt-5.4-mini":
+            return "GPT-5.4 Mini"
+        case "gpt-5.4-nano":
+            return "GPT-5.4 Nano"
         case "gpt-5":
             return "GPT-5"
         case "gpt-5-mini":
@@ -308,6 +338,8 @@ extension MacPawOpenAIProvider {
     /// - Returns: true if the model supports function calling
     static func supportsFunctionCalling(model: Model) -> Bool {
         switch model {
+        case "gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-pro", "gpt-5.4-mini", "gpt-5.4-nano":
+            return true
         case "gpt-5", "gpt-5-mini", "gpt-5-nano":
             return true
         case Model.gpt4_o, Model.gpt4_turbo, Model.gpt4, Model.gpt4_1106_preview, Model.gpt4_0125_preview:
@@ -324,6 +356,10 @@ extension MacPawOpenAIProvider {
     /// - Returns: Maximum context length in tokens
     static func maxContextLength(for model: Model) -> Int {
         switch model {
+        case "gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-pro":
+            return 1000000
+        case "gpt-5.4-mini", "gpt-5.4-nano":
+            return 400000
         case "gpt-5", "gpt-5-mini", "gpt-5-nano":
             return 128000
         case Model.gpt4_o:
