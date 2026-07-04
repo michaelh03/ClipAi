@@ -10,6 +10,10 @@ import SwiftUI
 /// View for managing AI provider configuration, API keys, and model selection
 struct AIConfigurationView: View {
     @ObservedObject var viewModel: LLMSettingsViewModel
+    @State private var customModelIdInput: String = ""
+    @State private var customModelEndpointInput: String = ""
+    @State private var customModelConfigJSONInput: String = ""
+    @State private var customModelError: String? = nil
     
     var body: some View {
         ScrollView {
@@ -46,6 +50,12 @@ struct AIConfigurationView: View {
           Task {
             await viewModel.loadProviderAvailabilityStatus()
           }
+        }
+        .onChange(of: viewModel.selectedProvider) { _ in
+            customModelIdInput = ""
+            customModelEndpointInput = ""
+            customModelConfigJSONInput = ""
+            customModelError = nil
         }
     }
     
@@ -319,7 +329,130 @@ struct AIConfigurationView: View {
                     .cornerRadius(8)
                 }
             }
+
+            if viewModel.supportsCustomModelEndpoints {
+                customModelManagementView
+            }
         }
+    }
+
+    private var customModelManagementView: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Custom Model Endpoint")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                TextField("Model ID (e.g., llama-3.1-70b)", text: $customModelIdInput)
+                    .textFieldStyle(.roundedBorder)
+                TextField("Endpoint URL (e.g., https://api.example.com/v1)", text: $customModelEndpointInput)
+                    .textFieldStyle(.roundedBorder)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Additional JSON (optional)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    TextEditor(text: $customModelConfigJSONInput)
+                        .font(.system(.caption, design: .monospaced))
+                        .frame(minHeight: 70, maxHeight: 120)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
+                    Text("Merged into the request body. Example: {\"reasoning\":{\"enabled\":true}}")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack {
+                    Button {
+                        let error = viewModel.addCustomModel(
+                            modelId: customModelIdInput,
+                            endpointURL: customModelEndpointInput,
+                            additionalConfigJSON: customModelConfigJSONInput
+                        )
+                        customModelError = error
+                        if error == nil {
+                            customModelIdInput = ""
+                            customModelEndpointInput = ""
+                            customModelConfigJSONInput = ""
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                            Text("Add Model")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(
+                        customModelIdInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        customModelEndpointInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+
+                    Spacer()
+                }
+
+                if let customModelError = customModelError {
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                        Text(customModelError)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(6)
+                }
+            }
+
+            if !viewModel.customModelsForSelectedProvider.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Saved Custom Models")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    ForEach(viewModel.customModelsForSelectedProvider, id: \.modelId) { model in
+                        HStack(alignment: .top, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(model.modelId)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(model.endpointURL)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(2)
+                                if let extra = model.additionalConfigJSON, !extra.isEmpty {
+                                    Text("Extra config: \(extra)")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(2)
+                                }
+                            }
+                            Spacer()
+                            Button {
+                                viewModel.removeCustomModel(modelId: model.modelId)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .foregroundColor(.red)
+                            .help("Remove custom model")
+                        }
+                        .padding(8)
+                        .background(Color.secondary.opacity(0.08))
+                        .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.secondary.opacity(0.08))
+        .cornerRadius(8)
     }
     
     private var apiKeyConfigurationView: some View {
@@ -349,12 +482,12 @@ struct AIConfigurationView: View {
                     
                     // Get API Key button
                     Button("Get Key") {
-                        if let url = URL(string: viewModel.selectedProvider.websiteURL) {
-                            NSWorkspace.shared.open(url)
-                        }
+                        guard let url = providerKeyURL else { return }
+                        NSWorkspace.shared.open(url)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+                    .disabled(providerKeyURL == nil)
                 }
                 
                 // Format hint and validation
@@ -522,6 +655,12 @@ struct AIConfigurationView: View {
         } else {
             return "\(count)"
         }
+    }
+
+    private var providerKeyURL: URL? {
+        let trimmed = viewModel.selectedProvider.websiteURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return URL(string: trimmed)
     }
 }
 
